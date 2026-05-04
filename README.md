@@ -1,6 +1,6 @@
 # SWE Failure Bench
 
-Eight realistic software-engineering tasks designed to stress-test LLMs on production Python bug-fixing. Each task is based on real production patterns and has multi-stage bugs that require deep language/library understanding to fix correctly.
+Fourteen realistic software-engineering tasks designed to stress-test LLMs on production Python bug-fixing. Tasks 1–8 were the initial batch (observed 50% pass rate vs Kimi 2.6). Tasks 9–14 are the hardened batch targeting <20% pass rate, based on findings from the initial evaluation.
 
 ## Target
 
@@ -8,16 +8,29 @@ Pass rate **< 20%** on Kimi 2.6 (or similar capable models).
 
 ## Task Overview
 
-| # | Task | Core Challenge | Bug Count |
+### Initial Batch (Tasks 1–8) — observed ~50% pass rate vs Kimi 2.6
+
+| # | Task | Core Challenge | Kimi result |
 |---|------|---------------|-----------|
-| 1 | `async_worker_pool` | asyncio cancellation propagation + exception collection in context manager | 4 |
-| 2 | `connection_pool` | threading.Condition race condition + close() notification + double-release guard | 3 |
-| 3 | `mini_jsonschema` | `additionalProperties` enforcement + `$ref` threading + `oneOf` exact-match semantics | 3 |
-| 4 | `tokenizer` | string escape processing + raw strings + triple-quoted multi-line strings | 3 |
-| 5 | `lfu_cache` | O(1) LFU with correct `_min_freq` tracking + LRU tie-breaking within buckets | 3 |
-| 6 | `query_builder` | SQL clause ordering + parameter ordering with JOINs + OFFSET-without-LIMIT guard | 3 |
-| 7 | `event_emitter` | dot-aware glob matching + per-handler error isolation + WeakMethod for bound methods | 3 |
-| 8 | `resp_parser` | CRLF consumption after bulk string + position threading in arrays + streaming/pipelining | 3 |
+| 1 | `async_worker_pool` | asyncio cancellation propagation + exception re-raise | PASSED |
+| 2 | `connection_pool` | threading.Condition race + notify_all + double-release | PASSED |
+| 3 | `mini_jsonschema` | oneOf exact-match + $ref threading + additionalProperties | FAILED (API timeout) |
+| 4 | `tokenizer` | raw strings + triple-quoted + escape sequences | FAILED (API timeout) |
+| 5 | `lfu_cache` | O(1) LFU _min_freq tracking + LRU tie-breaking | PASSED |
+| 6 | `query_builder` | SQL clause ordering + JOIN param order | PASSED |
+| 7 | `event_emitter` | dot-aware glob + WeakMethod + error isolation | FAILED (API timeout) |
+| 8 | `resp_parser` | CRLF consumption + array position threading | FAILED (API timeout) |
+
+### Hardened Batch (Tasks 9–14) — designed for <20% pass rate
+
+| # | Task | Why harder | Bug Count |
+|---|------|-----------|-----------|
+| 9 | `sliding_window` | Injectable-clock bugs; boundary semantics not obvious from error message | 2 |
+| 10 | `expr_evaluator` | **Multi-file** (lexer+parser+evaluator); 3 independent bugs across files | 3 |
+| 11 | `weighted_cache` | Two interacting bugs: eviction condition AND size-on-update both wrong | 2 |
+| 12 | `rope` | Off-by-one in recursive split; boundary case in internal nodes; character loss | 2 |
+| 13 | `json_rpc` | **Multi-file** (protocol+dispatcher+client); swapped error codes + notification semantics + id-based matching | 3 |
+| 14 | `pkg_resolver` | `>=`/`<=` boundary bug (wrong output, not exception) + missing transitive resolution | 2 |
 
 ## Why These Trip Up LLMs
 

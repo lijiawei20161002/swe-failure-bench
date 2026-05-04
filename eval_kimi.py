@@ -121,11 +121,19 @@ def call_kimi(messages: list[dict], retries: int = 3) -> dict:
             resp.raise_for_status()
             return resp.json()
         except requests.HTTPError as e:
+            status = e.response.status_code if e.response else 0
             body = e.response.text if e.response else str(e)
-            print(f"    HTTP error (attempt {attempt+1}): {e.response.status_code} {body[:200]}")
+            print(f"    HTTP error (attempt {attempt+1}): {status} {body[:200]}")
             if attempt == retries - 1:
                 raise
-            time.sleep(5 * (attempt + 1))
+            if status == 429:
+                # Honour Retry-After header, minimum 60s
+                retry_after = int(e.response.headers.get("Retry-After", 60))
+                wait = max(retry_after, 60)
+                print(f"    Rate limited — waiting {wait}s (Retry-After={retry_after}s)...")
+                time.sleep(wait)
+            else:
+                time.sleep(5 * (attempt + 1))
         except requests.Timeout:
             print(f"    Timeout (attempt {attempt+1})")
             if attempt == retries - 1:
@@ -430,7 +438,9 @@ def main():
     print(f"Running {len(task_dirs)} task(s) | max_turns={args.max_turns} | model={KIMI_MODEL}")
 
     results: dict[str, bool] = {}
-    for td in task_dirs:
+    for i, td in enumerate(task_dirs):
+        if i > 0:
+            time.sleep(5)   # brief pause between tasks to avoid rate limits
         traj = eval_task(td.name, td, args.max_turns)
         results[td.name] = traj["passed"]
 

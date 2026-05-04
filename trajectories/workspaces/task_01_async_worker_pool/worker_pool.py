@@ -35,36 +35,27 @@ class WorkerPool:
         self._semaphore = asyncio.Semaphore(max_workers)
         self._tasks: set[asyncio.Task] = set()
         self._shutdown = False
-        self._aborting = False
         self._exceptions: list[BaseException] = []
 
     async def submit(self, coro: Coroutine[Any, Any, T]) -> asyncio.Task[T]:
         """Schedule a coroutine for execution. Returns the Task."""
-        if self._shutdown or self._aborting:
-            raise PoolShutdownError("Pool is shut down")
+        if self._shutdown:
+            raise RuntimeError("Pool is shut down")
 
         await self._semaphore.acquire()
-        task = asyncio.create_task(coro)
+        task = asyncio.create_task(self._run(coro))
         self._tasks.add(task)
-        task.add_done_callback(self._on_task_done)
+        task.add_done_callback(self._tasks.discard)
         return task
 
-    def _on_task_done(self, task: asyncio.Task) -> None:
-        self._tasks.discard(task)
-        self._semaphore.release()
-        if task.cancelled():
-            return
-        exc = task.exception()
-        if exc is not None:
+    async def _run(self, coro: Coroutine[Any, Any, T]) -> T:
+        try:
+            return await coro
+        except Exception as exc:
             self._exceptions.append(exc)
-            if not self._aborting and not self._shutdown:
-                self._aborting = True
-                asyncio.get_running_loop().call_soon(self._cancel_all)
-
-    def _cancel_all(self) -> None:
-        for t in list(self._tasks):
-            if not t.done():
-                t.cancel()
+            raise
+        finally:
+            self._semaphore.release()
 
     async def shutdown(self, cancel: bool = False) -> None:
         """
@@ -74,8 +65,7 @@ class WorkerPool:
         self._shutdown = True
         if cancel:
             for t in list(self._tasks):
-                if not t.done():
-                    t.cancel()
+                t.cancel()
         if self._tasks:
             await asyncio.gather(*list(self._tasks), return_exceptions=True)
 
@@ -83,6 +73,4 @@ class WorkerPool:
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
-        await self.shutdown(cancel=bool(self._exceptions))
-        if exc_val is None and self._exceptions:
-            raise self._exceptions[0]
+        await self.shutdown()

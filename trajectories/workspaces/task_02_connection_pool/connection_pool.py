@@ -39,7 +39,7 @@ class ConnectionPool:
         self._lock = threading.Lock()
         self._not_empty = threading.Condition(self._lock)
         self._idle: list[Any] = []
-        self._in_use: set[Any] = set()
+        self._in_use: int = 0
         self._closed = False
 
     # ── acquire ──────────────────────────────────────────────────────────────
@@ -55,14 +55,14 @@ class ConnectionPool:
                 # Return an idle connection if one exists
                 if self._idle:
                     conn = self._idle.pop()
-                    self._in_use.add(conn)
+                    self._in_use += 1
                     return conn
 
                 # Spin up a new connection if under limit
-                total = len(self._idle) + len(self._in_use)
+                total = len(self._idle) + self._in_use
                 if total < self._max_size:
                     conn = self._factory()
-                    self._in_use.add(conn)
+                    self._in_use += 1
                     return conn
 
                 # Wait for a connection to become available
@@ -78,15 +78,12 @@ class ConnectionPool:
     def release(self, conn: Any) -> None:
         """Return a connection to the pool."""
         with self._not_empty:
-            if conn not in self._in_use:
-                raise ValueError("connection not acquired from this pool or already released")
-            self._in_use.remove(conn)
+            self._in_use -= 1
             if self._closed:
                 _close_conn(conn)
-                self._not_empty.notify()
                 return
             # Keep idle if under limit, otherwise discard
-            if len(self._idle) + len(self._in_use) < self._max_size:
+            if len(self._idle) + self._in_use < self._max_size:
                 self._idle.append(conn)
             else:
                 _close_conn(conn)
@@ -100,7 +97,6 @@ class ConnectionPool:
             self._closed = True
             idle = self._idle[:]
             self._idle.clear()
-            self._not_empty.notify_all()
         for c in idle:
             _close_conn(c)
 
@@ -108,7 +104,7 @@ class ConnectionPool:
     def size(self) -> int:
         """Total connections managed by this pool (idle + in-use)."""
         with self._lock:
-            return len(self._idle) + len(self._in_use)
+            return len(self._idle) + self._in_use
 
     @property
     def idle_count(self) -> int:
