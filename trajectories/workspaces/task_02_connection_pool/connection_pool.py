@@ -40,6 +40,7 @@ class ConnectionPool:
         self._not_empty = threading.Condition(self._lock)
         self._idle: list[Any] = []
         self._in_use: int = 0
+        self._in_use_set: set[Any] = set()
         self._closed = False
 
     # ── acquire ──────────────────────────────────────────────────────────────
@@ -56,6 +57,7 @@ class ConnectionPool:
                 if self._idle:
                     conn = self._idle.pop()
                     self._in_use += 1
+                    self._in_use_set.add(conn)
                     return conn
 
                 # Spin up a new connection if under limit
@@ -63,6 +65,7 @@ class ConnectionPool:
                 if total < self._max_size:
                     conn = self._factory()
                     self._in_use += 1
+                    self._in_use_set.add(conn)
                     return conn
 
                 # Wait for a connection to become available
@@ -78,9 +81,13 @@ class ConnectionPool:
     def release(self, conn: Any) -> None:
         """Return a connection to the pool."""
         with self._not_empty:
+            if conn not in self._in_use_set:
+                raise ValueError("connection not acquired from this pool or already released")
+            self._in_use_set.remove(conn)
             self._in_use -= 1
             if self._closed:
                 _close_conn(conn)
+                self._not_empty.notify()
                 return
             # Keep idle if under limit, otherwise discard
             if len(self._idle) + self._in_use < self._max_size:
@@ -97,6 +104,7 @@ class ConnectionPool:
             self._closed = True
             idle = self._idle[:]
             self._idle.clear()
+            self._not_empty.notify_all()
         for c in idle:
             _close_conn(c)
 

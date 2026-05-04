@@ -30,7 +30,7 @@ Types returned:
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 
@@ -47,10 +47,9 @@ class IncompleteError(Exception):
 
 @dataclass
 class RespParser:
-    _buf: bytearray = None
+    _buf: bytearray = field(default_factory=bytearray)
 
     def __post_init__(self):
-        self._buf = bytearray()
         self._messages: list[Any] = []
 
     def feed(self, data: bytes) -> None:
@@ -114,10 +113,16 @@ def _parse_one(buf: bytearray, pos: int) -> tuple[Any, int]:
         length = int(line)
         if length == -1:
             return None, pos
-        if pos + length > len(buf):
+        if length < -1:
+            raise ValueError(f"invalid bulk string length: {length}")
+        if pos + length + 2 > len(buf):
             raise IncompleteError
         data = bytes(buf[pos : pos + length])
         pos += length
+        # Consume trailing \r\n
+        if bytes(buf[pos : pos + 2]) != b"\r\n":
+            raise ValueError("expected \\r\\n after bulk string data")
+        pos += 2
         return data, pos
 
     elif type_byte == "*":

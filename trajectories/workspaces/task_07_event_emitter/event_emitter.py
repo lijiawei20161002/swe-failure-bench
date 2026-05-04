@@ -23,7 +23,7 @@ Public API:
 
 from __future__ import annotations
 
-import fnmatch
+import inspect
 import weakref
 from collections import defaultdict
 from typing import Any, Callable
@@ -81,7 +81,6 @@ class EventEmitter:
                     called += 1
                 except Exception as exc:
                     self._errors.append(exc)
-                    raise
 
                 if h.once:
                     to_remove.append((pattern, h))
@@ -118,7 +117,34 @@ def _matches(pattern: str, event: str) -> bool:
       "order.**" matches "order.created", "order.payment.done"
       "user.*"   does NOT match "user" (must have exactly one segment after)
     """
-    return fnmatch.fnmatch(event, pattern)
+    p_parts = pattern.split('.')
+    e_parts = event.split('.')
+
+    from functools import lru_cache
+
+    @lru_cache(maxsize=None)
+    def match(pi: int, ei: int) -> bool:
+        if pi == len(p_parts) and ei == len(e_parts):
+            return True
+        if pi == len(p_parts):
+            return False
+        if ei == len(e_parts):
+            # Only ** can match empty remaining event segments
+            return p_parts[pi] == '**' and match(pi + 1, ei)
+
+        pp = p_parts[pi]
+        if pp == '**':
+            # ** matches zero or more segments
+            for k in range(ei, len(e_parts) + 1):
+                if match(pi + 1, k):
+                    return True
+            return False
+        elif pp == '*':
+            return match(pi + 1, ei + 1)
+        else:
+            return pp == e_parts[ei] and match(pi + 1, ei + 1)
+
+    return match(0, 0)
 
 
 class _Handler:
@@ -130,7 +156,10 @@ class _Handler:
         self._id = id(fn)
         if weak:
             try:
-                self._ref = weakref.ref(fn)
+                if inspect.ismethod(fn):
+                    self._ref = weakref.WeakMethod(fn)
+                else:
+                    self._ref = weakref.ref(fn)
             except TypeError:
                 # Some callables (builtins) can't be weakly referenced
                 self._ref = fn
@@ -144,4 +173,15 @@ class _Handler:
         return self._ref
 
     def matches(self, fn: Callable) -> bool:
+        # Bound methods are transient objects, so id()/is comparison doesn't work
+        if inspect.ismethod(fn):
+            resolved = self.resolve()
+            if resolved is None:
+                return False
+            if not inspect.ismethod(resolved):
+                return False
+            return (
+                resolved.__func__ is fn.__func__
+                and resolved.__self__ is fn.__self__
+            )
         return self._id == id(fn) or self.resolve() is fn

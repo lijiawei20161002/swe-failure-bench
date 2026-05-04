@@ -58,6 +58,7 @@ class LFUCache:
         if 1 not in self._freq_to_keys:
             self._freq_to_keys[1] = OrderedDict()
         self._freq_to_keys[1][key] = None
+        self._min_freq = 1
 
     # ── internals ─────────────────────────────────────────────────────────────
 
@@ -66,17 +67,18 @@ class LFUCache:
         del self._freq_to_keys[f][key]
         if not self._freq_to_keys[f]:
             del self._freq_to_keys[f]
+            if f == self._min_freq:
+                self._min_freq += 1
 
         new_f = f + 1
         self._freq[key] = new_f
         if new_f not in self._freq_to_keys:
             self._freq_to_keys[new_f] = OrderedDict()
         self._freq_to_keys[new_f][key] = None
-        self._freq_to_keys[new_f].move_to_end(key, last=False)
 
     def _evict(self) -> None:
         """Evict the LFU key; break ties by LRU (oldest access first)."""
-        bucket = self._freq_to_keys[self._min_freq]        # uses _min_freq (correct structure)
+        bucket = self._freq_to_keys[self._min_freq]
         evict_key, _ = bucket.popitem(last=False)          # pop LRU = first item
         if not bucket:
             del self._freq_to_keys[self._min_freq]

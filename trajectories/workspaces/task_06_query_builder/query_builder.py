@@ -71,6 +71,9 @@ class Query:
 
     def build(self) -> tuple[str, list[Any]]:
         """Return (sql_string, params_list)."""
+        if self._offset is not None and self._limit is None:
+            raise ValueError("OFFSET requires LIMIT")
+
         params: list[Any] = []
         parts: list[str] = []
 
@@ -99,22 +102,22 @@ class Query:
 
         # HAVING
         if self._havings:
-            having_clauses = []
+            clauses = []
             for clause, p in self._havings:
-                having_clauses.append(clause)
+                clauses.append(clause)
                 params.extend(p)
-            parts.append("HAVING " + " AND ".join(having_clauses))
+            parts.append("HAVING " + " AND ".join(clauses))
 
         # ORDER BY
         if self._order_by:
             parts.append("ORDER BY " + ", ".join(self._order_by))
 
-        # LIMIT / OFFSET
+        # LIMIT
         if self._limit is not None:
             parts.append(f"LIMIT {self._limit}")
+
+        # OFFSET
         if self._offset is not None:
-            if self._limit is None:
-                raise ValueError("OFFSET without LIMIT is not valid SQL")
             parts.append(f"OFFSET {self._offset}")
 
         sql = "\n".join(parts)

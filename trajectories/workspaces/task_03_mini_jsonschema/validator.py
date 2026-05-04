@@ -59,7 +59,7 @@ def validate(instance: Any, schema: dict, *, _defs: dict | None = None) -> None:
 
     # ── string ────────────────────────────────────────────────────────────────
     if isinstance(instance, str):
-        if "minLength" in schema and len(instance) < schema["minLength"]:
+        if "minLength" in schema and len(instance) <= schema["minLength"]:
             raise ValidationError(f"string too short (min {schema['minLength']})")
         if "maxLength" in schema and len(instance) > schema["maxLength"]:
             raise ValidationError(f"string too long (max {schema['maxLength']})")
@@ -72,9 +72,15 @@ def validate(instance: Any, schema: dict, *, _defs: dict | None = None) -> None:
                     raise ValidationError(f"required field '{field}' is missing")
 
         props = schema.get("properties", {})
+        additional = schema.get("additionalProperties")
         for key, val in instance.items():
             if key in props:
                 validate(val, props[key], _defs=_defs)
+            else:
+                if additional is False:
+                    raise ValidationError(f"additional property '{key}' not allowed")
+                elif isinstance(additional, dict):
+                    validate(val, additional, _defs=_defs)
 
     # ── array ─────────────────────────────────────────────────────────────────
     if isinstance(instance, list):
@@ -111,11 +117,10 @@ def validate(instance: Any, schema: dict, *, _defs: dict | None = None) -> None:
             try:
                 validate(instance, sub, _defs=_defs)
                 matched += 1
-                break
             except ValidationError:
                 pass
-        if matched == 0:
-            raise ValidationError("does not match any oneOf schema")
+        if matched != 1:
+            raise ValidationError(f"matches {matched} oneOf schemas, expected exactly 1")
 
 
 # ── helpers ───────────────────────────────────────────────────────────────────
