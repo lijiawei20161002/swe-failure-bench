@@ -40,12 +40,11 @@ class WorkerPool:
     async def submit(self, coro: Coroutine[Any, Any, T]) -> asyncio.Task[T]:
         """Schedule a coroutine for execution. Returns the Task."""
         if self._shutdown:
-            raise RuntimeError("Pool is shut down")
+            raise PoolShutdownError("Pool is shut down")
 
         await self._semaphore.acquire()
         task = asyncio.create_task(self._run(coro))
         self._tasks.add(task)
-        task.add_done_callback(self._tasks.discard)
         return task
 
     async def _run(self, coro: Coroutine[Any, Any, T]) -> T:
@@ -53,6 +52,10 @@ class WorkerPool:
             return await coro
         except Exception as exc:
             self._exceptions.append(exc)
+            current = asyncio.current_task()
+            for t in list(self._tasks):
+                if t is not current and not t.done():
+                    t.cancel()
             raise
         finally:
             self._semaphore.release()
@@ -63,14 +66,19 @@ class WorkerPool:
         If cancel=True, cancel them instead.
         """
         self._shutdown = True
+        tasks = list(self._tasks)
         if cancel:
-            for t in list(self._tasks):
-                t.cancel()
-        if self._tasks:
-            await asyncio.gather(*list(self._tasks), return_exceptions=True)
+            for t in tasks:
+                if not t.done():
+                    t.cancel()
+        if tasks:
+            await asyncio.gather(*tasks, return_exceptions=True)
+        self._tasks.clear()
 
     async def __aenter__(self) -> "WorkerPool":
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         await self.shutdown()
+        if exc_type is None and self._exceptions:
+            raise self._exceptions[0]

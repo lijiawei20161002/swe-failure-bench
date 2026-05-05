@@ -1,24 +1,18 @@
 {
-  "timestamp": "2026-05-04T22:02:43.367224",
+  "timestamp": "2026-05-05T09:00:00.459834",
   "model": "kimi-for-coding",
   "max_turns": 30,
   "results": {
-    "task_01_async_worker_pool": false,
-    "task_02_connection_pool": true,
-    "task_03_mini_jsonschema": true,
+    "task_01_async_worker_pool": true,
     "task_04_tokenizer": false,
-    "task_05_lfu_cache": true,
-    "task_06_query_builder": true,
-    "task_07_event_emitter": true,
-    "task_08_resp_parser": true,
-    "task_09_sliding_window": true,
-    "task_10_expr_evaluator": true,
-    "task_11_weighted_cache": true,
-    "task_12_rope": true,
-    "task_13_json_rpc": true,
-    "task_14_pkg_resolver": true
+    "task_05_async_generator": false,
+    "task_06_btree": true,
+    "task_07_regex_engine": false,
+    "task_08_context_vars": true,
+    "task_09_raft_log": true,
+    "task_10_gc_cycles": false
   },
-  "passed": 12,
-  "total": 14,
-  "pass_rate": 0.8571428571428571
+  "passed": 4,
+  "total": 8,
+  "pass_rate": 0.5
 }
