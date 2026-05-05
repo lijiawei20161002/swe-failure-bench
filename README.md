@@ -1,96 +1,66 @@
 # SWE Failure Bench
 
-Fourteen realistic software-engineering tasks designed to stress-test LLMs on production Python bug-fixing. Tasks 1–8 were the initial batch (observed 50% pass rate vs Kimi 2.6). Tasks 9–14 are the hardened batch targeting <20% pass rate, based on findings from the initial evaluation.
+Eight Python bug-fixing tasks designed to expose the limits of Kimi 2.6 (kimi-for-coding).
+Tasks 01–02 were carried over from an initial 14-task batch after empirical eval showed
+they reliably caused failures. Tasks 03–08 were designed from scratch based on those findings.
 
-## Target
+## Benchmark Goal
 
-Pass rate **< 20%** on Kimi 2.6 (or similar capable models).
+**Target pass rate: < 20%** on `kimi-for-coding` (or similar frontier coding models).
+
+**Observed pass rate: 50%** (4/8) — see `FINDINGS.md` for full analysis.
 
 ## Task Overview
 
-### Initial Batch (Tasks 1–8) — observed ~50% pass rate vs Kimi 2.6
+| # | Seed file | Core challenge | Kimi result |
+|---|-----------|---------------|-------------|
+| 01 | `async_worker_pool/worker_pool.py` | asyncio cancellation propagation + PoolShutdownError + graceful shutdown | ✓ PASSED (3 turns) |
+| 02 | `tokenizer/tokenizer.py` | Regex state machine: raw strings + triple-quoted + escape sequences | ✗ FAILED (API abort) |
+| 03 | `async_generator/pipeline.py` | Async generator `aclose()` protocol — upstream stages never finalized | ✗ FAILED (30 turns, no fix written) |
+| 04 | `btree/btree.py` | B-tree split off-by-one (t vs t-1) + live cursor reflecting deletions | ✓ PASSED (2 turns) |
+| 05 | `regex_engine/regex_engine.py` | NFA construction: unhashable State + broken ε-closure + range classes | ✗ FAILED (API abort) |
+| 06 | `context_vars/ctx_state.py` | `contextvars.Context()` fresh isolation vs `copy_context()` | ✓ PASSED (4 turns) |
+| 07 | `raft_log/raft_log.py` | Raft AppendEntries: commit-on-reject + wrong truncation slice offset | ✓ PASSED (3 turns) |
+| 08 | `gc_cycles/ref_graph.py` | CPython GC tricolor: inverted gc_refs subtraction + finalizer leak | ✗ FAILED (4 turns, no fix written) |
 
-| # | Task | Core Challenge | Kimi result |
-|---|------|---------------|-----------|
-| 1 | `async_worker_pool` | asyncio cancellation propagation + exception re-raise | PASSED |
-| 2 | `connection_pool` | threading.Condition race + notify_all + double-release | PASSED |
-| 3 | `mini_jsonschema` | oneOf exact-match + $ref threading + additionalProperties | FAILED (API timeout) |
-| 4 | `tokenizer` | raw strings + triple-quoted + escape sequences | FAILED (API timeout) |
-| 5 | `lfu_cache` | O(1) LFU _min_freq tracking + LRU tie-breaking | PASSED |
-| 6 | `query_builder` | SQL clause ordering + JOIN param order | PASSED |
-| 7 | `event_emitter` | dot-aware glob + WeakMethod + error isolation | FAILED (API timeout) |
-| 8 | `resp_parser` | CRLF consumption + array position threading | FAILED (API timeout) |
+## Running the Eval
 
-### Hardened Batch (Tasks 9–14) — designed for <20% pass rate
+```bash
+export KIMI_API_KEY=sk-...
+python3 eval_kimi.py                      # all 8 tasks
+python3 eval_kimi.py --task task_03_async_generator
+python3 eval_kimi.py --max-turns 30
+```
 
-| # | Task | Why harder | Bug Count |
-|---|------|-----------|-----------|
-| 9 | `sliding_window` | Injectable-clock bugs; boundary semantics not obvious from error message | 2 |
-| 10 | `expr_evaluator` | **Multi-file** (lexer+parser+evaluator); 3 independent bugs across files | 3 |
-| 11 | `weighted_cache` | Two interacting bugs: eviction condition AND size-on-update both wrong | 2 |
-| 12 | `rope` | Off-by-one in recursive split; boundary case in internal nodes; character loss | 2 |
-| 13 | `json_rpc` | **Multi-file** (protocol+dispatcher+client); swapped error codes + notification semantics + id-based matching | 3 |
-| 14 | `pkg_resolver` | `>=`/`<=` boundary bug (wrong output, not exception) + missing transitive resolution | 2 |
+The eval script requires `requests` and `pytest` / `pytest-asyncio`.
 
-## Why These Trip Up LLMs
-
-Each task has been designed so that the **obvious first fix is insufficient** and multiple interacting bugs must all be resolved:
-
-- **Task 1**: Fixing exception re-raise is obvious; cancelling siblings and collecting multiple exceptions requires restructuring the internal task set management.
-- **Task 3**: Adding `additionalProperties` check is straightforward; threading `_defs` through recursive property validation and making `oneOf` count *all* matches (not stop early) are separate, non-obvious fixes.
-- **Task 5**: Changing `_evict()` to use `_min_freq` fixes one thing; keeping `_min_freq` correct after `put()` and `_increment()` are separate invariants.
-- **Task 7**: `fnmatch` replacement for dot-aware globs is known; `WeakMethod` for bound methods (vs `weakref.ref` which immediately dies) is a common Python trap.
-- **Task 8**: The CRLF-after-bulk-string bug is well-known; the array position bug (`pos` not threaded between elements) is a separate indexing error.
-
-## Structure
+## Directory Layout
 
 ```
 swe-failure-bench/
-  tasks/           ← task description .md files (synthetic user format)
   seeds/
-    task_01_async_worker_pool/
-      worker_pool.py       ← buggy implementation
-      tests/
-        test_worker_pool.py
-    task_02_connection_pool/
-      ...
+    task_01_async_worker_pool/    ← buggy implementation + tests
+    task_02_tokenizer/
+    task_03_async_generator/
+    task_04_btree/
+    task_05_regex_engine/
+    task_06_context_vars/
+    task_07_raft_log/
+    task_08_gc_cycles/
+  tasks/                          ← synthetic-user task descriptions (opencode format)
+    task_01_async_worker_pool.md
     ...
+  trajectories/                   ← JSON trajectory files from eval runs
+  eval_kimi.py                    ← eval harness
+  FINDINGS.md                     ← full analysis and results
 ```
 
-## Running Tasks with OpenCode + Synthetic User
-
-Copy the `opencode-setup-offline-exp 10` scripts and config, then:
+## Test Commands
 
 ```bash
-# Seed the workspace
-cp -r seeds/task_01_async_worker_pool/* /path/to/opencode-setup/seed/
-
-# Run with Kimi
-cd /path/to/opencode-setup
-./scripts/run_task.sh model_A ../swe-failure-bench/tasks/task_01_async_worker_pool.md
-```
-
-Or use the Kimi eval wrapper:
-
-```bash
-python3 run_kimi_eval.py --task tasks/task_01_async_worker_pool.md
-```
-
-## Scoring
-
-A task is **passed** only when the full test suite runs clean:
-```bash
-cd /workspace && pytest tests/ -x -q
-```
-
-Partial milestone completion does not count as a pass.
-
-## Test Commands Per Task
-
-```bash
-# Task 1
-pip install pytest pytest-asyncio && pytest tests/ -x -q
-
-# Tasks 2–8
-pip install pytest && pytest tests/ -x -q
+# Verify each seed fails before running the eval
+for d in seeds/task_*/; do
+  echo -n "$d: "
+  (cd $d && python3 -m pytest tests/ -q 2>&1 | tail -1)
+done
 ```
