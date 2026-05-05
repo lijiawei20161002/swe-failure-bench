@@ -1,18 +1,51 @@
 {
-  "timestamp": "2026-05-05T09:00:00.459834",
+  "timestamp": "2026-05-05T17:03:38.167106",
   "model": "kimi-for-coding",
   "max_turns": 30,
-  "results": {
-    "task_01_async_worker_pool": true,
-    "task_04_tokenizer": false,
-    "task_05_async_generator": false,
-    "task_06_btree": true,
-    "task_07_regex_engine": false,
-    "task_08_context_vars": true,
-    "task_09_raft_log": true,
-    "task_10_gc_cycles": false
+  "runs_per_task": 5,
+  "per_task": {
+    "task_01_async_worker_pool": {
+      "passes": 3,
+      "runs": 5,
+      "pass_rate": 0.6
+    },
+    "task_02_tokenizer": {
+      "passes": 0,
+      "runs": 5,
+      "pass_rate": 0.0
+    },
+    "task_03_async_generator": {
+      "passes": 2,
+      "runs": 5,
+      "pass_rate": 0.4
+    },
+    "task_04_btree": {
+      "passes": 2,
+      "runs": 5,
+      "pass_rate": 0.4
+    },
+    "task_05_regex_engine": {
+      "passes": 2,
+      "runs": 5,
+      "pass_rate": 0.4
+    },
+    "task_06_context_vars": {
+      "passes": 5,
+      "runs": 5,
+      "pass_rate": 1.0
+    },
+    "task_07_raft_log": {
+      "passes": 5,
+      "runs": 5,
+      "pass_rate": 1.0
+    },
+    "task_08_gc_cycles": {
+      "passes": 2,
+      "runs": 5,
+      "pass_rate": 0.4
+    }
   },
-  "passed": 4,
-  "total": 8,
-  "pass_rate": 0.5
+  "total_passed": 21,
+  "total_attempts": 40,
+  "pass_rate": 0.525
 }

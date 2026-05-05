@@ -419,6 +419,8 @@ def main():
     parser = argparse.ArgumentParser(description="Evaluate Kimi on swe-failure-bench")
     parser.add_argument("--task", help="Run only this task (seed dir name)")
     parser.add_argument("--max-turns", type=int, default=DEFAULT_MAX_TURNS)
+    parser.add_argument("--runs", type=int, default=1,
+                        help="Number of independent runs per task (for pass-rate estimation)")
     args = parser.parse_args()
 
     TRAJ_DIR.mkdir(parents=True, exist_ok=True)
@@ -435,27 +437,66 @@ def main():
             if d.is_dir() and (d / "tests").exists()
         ])
 
-    print(f"Running {len(task_dirs)} task(s) | max_turns={args.max_turns} | model={KIMI_MODEL}")
+    n_runs = args.runs
+    print(f"Running {len(task_dirs)} task(s) × {n_runs} run(s) | "
+          f"max_turns={args.max_turns} | model={KIMI_MODEL}")
 
-    results: dict[str, bool] = {}
-    for i, td in enumerate(task_dirs):
-        if i > 0:
-            time.sleep(5)   # brief pause between tasks to avoid rate limits
-        traj = eval_task(td.name, td, args.max_turns)
-        results[td.name] = traj["passed"]
+    # multi_results[task_name] = list of bool (one per run)
+    multi_results: dict[str, list[bool]] = {td.name: [] for td in task_dirs}
 
-    # Summary
-    passed_count = sum(1 for v in results.values() if v)
-    total = len(results)
+    call_idx = 0
+    for run_num in range(1, n_runs + 1):
+        if n_runs > 1:
+            print(f"\n{'─'*62}")
+            print(f"  RUN {run_num}/{n_runs}")
+            print(f"{'─'*62}")
+        for i, td in enumerate(task_dirs):
+            if call_idx > 0:
+                time.sleep(5)   # brief pause to avoid rate limits
+            call_idx += 1
+            traj = eval_task(td.name, td, args.max_turns)
+            multi_results[td.name].append(traj["passed"])
+
+    # ── Summary ───────────────────────────────────────────────────────────────
     print(f"\n{'='*62}")
     print("FINAL RESULTS")
+    if n_runs > 1:
+        print(f"  ({n_runs} runs per task)")
     print(f"{'='*62}")
-    for task, ok in results.items():
-        mark = "✓" if ok else "✗"
-        print(f"  {mark}  {task}")
-    pct = 100 * passed_count / total if total else 0
-    print(f"\n  Pass rate: {passed_count}/{total} = {pct:.0f}%")
+
+    total_attempts = 0
+    total_passed = 0
+    for task in sorted(multi_results):
+        outcomes = multi_results[task]
+        passes = sum(outcomes)
+        total_attempts += len(outcomes)
+        total_passed += passes
+        if n_runs == 1:
+            mark = "✓" if outcomes[0] else "✗"
+            print(f"  {mark}  {task}")
+        else:
+            pct = 100 * passes / len(outcomes)
+            marks = "".join("✓" if o else "✗" for o in outcomes)
+            print(f"  {passes}/{len(outcomes)} ({pct:3.0f}%)  {task}  [{marks}]")
+
+    overall_pct = 100 * total_passed / total_attempts if total_attempts else 0
+    print(f"\n  Overall pass rate: {total_passed}/{total_attempts} = {overall_pct:.0f}%")
     print(f"{'='*62}\n")
+
+    summary = {
+        "timestamp":   datetime.now().isoformat(),
+        "model":       KIMI_MODEL,
+        "max_turns":   args.max_turns,
+        "runs_per_task": n_runs,
+        "per_task":    {t: {"passes": sum(v), "runs": len(v),
+                            "pass_rate": sum(v)/len(v)}
+                        for t, v in multi_results.items()},
+        "total_passed":   total_passed,
+        "total_attempts": total_attempts,
+        "pass_rate":   total_passed / total_attempts if total_attempts else 0,
+    }
+    (TRAJ_DIR / "summary.json").write_text(json.dumps(summary, indent=2))
+    print(f"Summary saved to trajectories/summary.json")
 
     summary = {
         "timestamp":   datetime.now().isoformat(),

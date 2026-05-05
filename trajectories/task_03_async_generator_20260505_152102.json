@@ -1,0 +1,193 @@
+{
+  "task": "task_03_async_generator",
+  "start_time": "2026-05-05T14:33:14.421130",
+  "model": "kimi-for-coding",
+  "turns": [
+    {
+      "turn": 1,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 72,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -m pytest tests/ -v"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "t_pipeline.py::TestBasic::test_empty_source PASSED              [ 25%]\ntests/test_pipeline.py::TestBasic::test_no_stages PASSED                 [ 33%]\ntests/test_pipeline.py::TestFinalizerOnSuccess::test_single_stage_finalizer_runs PASSED [ 41%]\ntests/test_pipeline.py::TestFinalizerOnSuccess::test_all_stages_finalize_on_success PASSED [ 50%]\ntests/test_pipeline.py::TestFinalizerOnException::test_f"
+        }
+      ]
+    },
+    {
+      "turn": 2,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 6116,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\nimport asyncio\n\nasync def main():\n    async def gen():\n        try:\n            yield 1\n            yield 2\n        finally:\n            print('finally')\n    \n    async for x in gen():\n  "
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "1\nfinally"
+        }
+      ]
+    },
+    {
+      "turn": 3,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 1913,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\nimport asyncio\n\nasync def main():\n    async def inner():\n        try:\n            yield 1\n            yield 2\n            yield 3\n        finally:\n            print('inner finally')\n    \n"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "2\nouter finally\ninner finally"
+        }
+      ]
+    },
+    {
+      "turn": 4,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 1177,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\nimport asyncio\nfrom pipeline import PipelineHarness\n\nasync def main():\n    harness = PipelineHarness()\n    harness.make_stage('A')\n    harness.make_stage('B')\n    result = await harness.r"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "result: [1, 2]\nfinalized: []"
+        }
+      ]
+    },
+    {
+      "turn": 5,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 435,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\nimport asyncio\n\nasync def main():\n    async def inner():\n        try:\n            yield 1\n            yield 2\n            yield 3\n        finally:\n            print('inner finally')\n    \n"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "got 1\nafter loop\nouter finally\ninner finally"
+        }
+      ]
+    },
+    {
+      "turn": 6,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 2751,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\nimport asyncio\n\nasync def main():\n    async def inner():\n        try:\n            yield 1\n            yield 2\n            yield 3\n        finally:\n            print('inner finally')\n    \n"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "before loop\ngot 1\nafter loop\nafter sleep\nouter finally\ninner finally"
+        }
+      ]
+    },
+    {
+      "turn": 7,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 6419,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\nimport asyncio\n\nasync def main():\n    async def gen():\n        try:\n            yield 1\n        finally:\n            print('finally')\n    \n    g = gen()\n    async for x in g:\n        pass"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "finally\naclose succeeded"
+        }
+      ]
+    },
+    {
+      "turn": 8,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 145,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\nimport asyncio\n\nasync def main():\n    async def gen():\n        try:\n            yield 1\n            yield 2\n        finally:\n            print('finally')\n    \n    g = gen()\n    v = await "
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "got 1\nfinally\naclose done"
+        }
+      ]
+    },
+    {
+      "turn": 9,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 9923,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\nimport asyncio\n\nasync def main():\n    async def source():\n        yield 1\n    \n    async def A(items):\n        try:\n            async for x in items:\n                yield x\n        final"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "got 1\nA finally\nB finally\nC finally\nafter loop"
+        }
+      ]
+    }
+  ],
+  "passed": false,
+  "pass_turn": null,
+  "total_turns": 9,
+  "total_api_calls": 9,
+  "end_time": "2026-05-05T15:21:01.609828",
+  "final_test_output": "stages_finalize_downstream_first\n    ???\nE   AssertionError: Expected finalization order C→B→A (downstream first), got ['A', 'B', 'C']\nE   assert ['A', 'B', 'C'] == ['C', 'B', 'A']\nE     \nE     At index 0 diff: 'A' != 'C'\nE     Use -v to get more diff\n=========================== short test summary info ============================\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_finalizer_runs_when_stage_raises\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_upstream_finalizer_runs_on_downstream_exception\nFAILED tests/test_pipeline.py::TestFinalizerOnCancel::test_finalizers_run_on_early_break\nFAILED tests/test_pipeline.py::TestFinalizationOrder::test_stages_finalize_downstream_first\n========================= 4 failed, 8 passed in 0.08s ==========================\n"
+}

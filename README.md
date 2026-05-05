@@ -8,7 +8,7 @@ they reliably caused failures. Tasks 03–08 were designed from scratch based on
 
 **Target pass rate: < 20%** on `kimi-for-coding` (or similar frontier coding models).
 
-**Observed pass rate: 50%** (4/8) — see `FINDINGS.md` for full analysis.
+**Observed pass rate: 52.5%** (21/40 over 5 runs) — see `FINDINGS.md` for full analysis.
 
 ## Task Overview
 
