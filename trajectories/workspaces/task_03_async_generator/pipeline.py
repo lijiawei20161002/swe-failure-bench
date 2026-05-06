@@ -52,12 +52,18 @@ class Pipeline:
         Run the pipeline over *source* and return all output items.
         All stage generators must be properly closed even if an error occurs.
         """
+        # BUG A: We wrap each stage but never call aclose() on the generators
+        # when an exception occurs. Python's async generators don't have
+        # guaranteed cleanup unless aclose() is explicitly awaited.
+        # Fix: use try/finally around the iteration loop and await gen.aclose()
+        # in the finally block for every generator we create.
+
         async def _source_gen() -> AsyncGenerator:
             for item in source:
                 yield item
 
         current: AsyncIterable = _source_gen()
-        generators = [current]
+        generators = []
 
         for stage_fn in self._stages:
             gen = stage_fn(current)
@@ -68,12 +74,12 @@ class Pipeline:
         try:
             async for item in current:
                 results.append(item)
-        finally:
-            for g in reversed(generators):
-                try:
-                    await g.aclose()
-                except Exception:
-                    pass
+        except Exception:
+            # BUG A: generators never get aclose() called on exception path.
+            # Each generator's finally block will NOT run.
+            raise
+        # BUG A: no finally block here to close generators on normal exit either.
+        # Python does NOT guarantee __aiter__ / __anext__ cleanup otherwise.
 
         return results
 
@@ -87,7 +93,7 @@ class Pipeline:
                 yield item
 
         current: AsyncIterable = _source_gen()
-        generators = [current]
+        generators = []
 
         for stage_fn in self._stages:
             gen = stage_fn(current)
@@ -95,17 +101,18 @@ class Pipeline:
             current = gen
 
         results = []
+        # BUG B: When we break out of the loop early, we don't close the
+        # generators. The downstream generator's finally block runs (because
+        # we exit the `async for`), but the UPSTREAM generators' finally
+        # blocks do not run automatically.
+        # Fix: explicitly close all generators in a finally block.
         try:
             async for item in current:
                 results.append(item)
                 if len(results) >= cancel_after:
                     break
         finally:
-            for g in reversed(generators):
-                try:
-                    await g.aclose()
-                except Exception:
-                    pass
+            pass   # BUG B: should be: for g in reversed(generators): await g.aclose()
 
         return results
 
