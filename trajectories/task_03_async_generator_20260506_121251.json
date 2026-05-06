@@ -1,0 +1,683 @@
+{
+  "task": "task_03_async_generator",
+  "start_time": "2026-05-06T11:50:13.404049",
+  "model": "kimi-for-coding",
+  "turns": [
+    {
+      "turn": 1,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 66,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -m pytest tests/ -v"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "t_pipeline.py::TestBasic::test_empty_source PASSED              [ 25%]\ntests/test_pipeline.py::TestBasic::test_no_stages PASSED                 [ 33%]\ntests/test_pipeline.py::TestFinalizerOnSuccess::test_single_stage_finalizer_runs PASSED [ 41%]\ntests/test_pipeline.py::TestFinalizerOnSuccess::test_all_stages_finalize_on_success PASSED [ 50%]\ntests/test_pipeline.py::TestFinalizerOnException::test_f"
+        }
+      ]
+    },
+    {
+      "turn": 2,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 12042,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "write_file",
+          "args": {
+            "path": "test_order.py",
+            "content": "import asyncio\n\nasync def main():\n    order = []\n    \n    async def source():\n        yield 1\n    \n    async def A(items):\n        try:\n            async for x in items:\n                yield x\n      "
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "write_file",
+          "result_preview": "OK: wrote 689 bytes to test_order.py"
+        }
+      ],
+      "test_run": {
+        "passed": false,
+        "output_tail": "stages_finalize_downstream_first\n    ???\nE   AssertionError: Expected finalization order C→B→A (downstream first), got ['A', 'B', 'C']\nE   assert ['A', 'B', 'C'] == ['C', 'B', 'A']\nE     \nE     At index 0 diff: 'A' != 'C'\nE     Use -v to get more diff\n=========================== short test summary info ============================\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_finalizer_runs_when_stage_raises\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_upstream_finalizer_runs_on_downstream_exception\nFAILED tests/test_pipeline.py::TestFinalizerOnCancel::test_finalizers_run_on_early_break\nFAILED tests/test_pipeline.py::TestFinalizationOrder::test_stages_finalize_downstream_first\n========================= 4 failed, 8 passed in 0.21s ==========================\n"
+      }
+    },
+    {
+      "turn": 3,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 68,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 test_order.py"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Order: ['A', 'B', 'C']"
+        }
+      ]
+    },
+    {
+      "turn": 4,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 3682,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "write_file",
+          "args": {
+            "path": "test_order2.py",
+            "content": "import asyncio\n\nasync def main():\n    order = []\n    \n    async def source():\n        yield 1\n    \n    async def A(items):\n        try:\n            async for x in items:\n                yield x\n      "
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "write_file",
+          "result_preview": "OK: wrote 814 bytes to test_order2.py"
+        }
+      ],
+      "test_run": {
+        "passed": false,
+        "output_tail": "stages_finalize_downstream_first\n    ???\nE   AssertionError: Expected finalization order C→B→A (downstream first), got ['A', 'B', 'C']\nE   assert ['A', 'B', 'C'] == ['C', 'B', 'A']\nE     \nE     At index 0 diff: 'A' != 'C'\nE     Use -v to get more diff\n=========================== short test summary info ============================\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_finalizer_runs_when_stage_raises\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_upstream_finalizer_runs_on_downstream_exception\nFAILED tests/test_pipeline.py::TestFinalizerOnCancel::test_finalizers_run_on_early_break\nFAILED tests/test_pipeline.py::TestFinalizationOrder::test_stages_finalize_downstream_first\n========================= 4 failed, 8 passed in 0.08s ==========================\n"
+      }
+    },
+    {
+      "turn": 5,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 103,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 test_order2.py"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Order: ['A', 'B', 'C']"
+        }
+      ]
+    },
+    {
+      "turn": 6,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 1182,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "write_file",
+          "args": {
+            "path": "test_order3.py",
+            "content": "import asyncio\n\nasync def main():\n    order = []\n    \n    async def source():\n        try:\n            yield 1\n        finally:\n            print(\"source finally\")\n    \n    async def A(items):\n       "
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "write_file",
+          "result_preview": "OK: wrote 2641 bytes to test_order3.py"
+        }
+      ],
+      "test_run": {
+        "passed": false,
+        "output_tail": "stages_finalize_downstream_first\n    ???\nE   AssertionError: Expected finalization order C→B→A (downstream first), got ['A', 'B', 'C']\nE   assert ['A', 'B', 'C'] == ['C', 'B', 'A']\nE     \nE     At index 0 diff: 'A' != 'C'\nE     Use -v to get more diff\n=========================== short test summary info ============================\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_finalizer_runs_when_stage_raises\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_upstream_finalizer_runs_on_downstream_exception\nFAILED tests/test_pipeline.py::TestFinalizerOnCancel::test_finalizers_run_on_early_break\nFAILED tests/test_pipeline.py::TestFinalizationOrder::test_stages_finalize_downstream_first\n========================= 4 failed, 8 passed in 0.08s ==========================\n"
+      }
+    },
+    {
+      "turn": 7,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 50,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 test_order3.py"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "source finally\nAfter natural exhaustion, order: ['A', 'B', 'C']\nAfter break, order2: []\nsource3 finally\nAfter explicit aclose on exhausted, order3: ['A', 'B', 'C']\nsource2 finally"
+        }
+      ]
+    },
+    {
+      "turn": 8,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 764,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "write_file",
+          "args": {
+            "path": "test_order4.py",
+            "content": "import asyncio\n\nasync def main():\n    order2 = []\n    \n    async def source2():\n        try:\n            yield 1\n            yield 2\n        finally:\n            print(\"source2 finally\")\n    \n    asyn"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "write_file",
+          "result_preview": "OK: wrote 1073 bytes to test_order4.py"
+        }
+      ],
+      "test_run": {
+        "passed": false,
+        "output_tail": "stages_finalize_downstream_first\n    ???\nE   AssertionError: Expected finalization order C→B→A (downstream first), got ['A', 'B', 'C']\nE   assert ['A', 'B', 'C'] == ['C', 'B', 'A']\nE     \nE     At index 0 diff: 'A' != 'C'\nE     Use -v to get more diff\n=========================== short test summary info ============================\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_finalizer_runs_when_stage_raises\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_upstream_finalizer_runs_on_downstream_exception\nFAILED tests/test_pipeline.py::TestFinalizerOnCancel::test_finalizers_run_on_early_break\nFAILED tests/test_pipeline.py::TestFinalizationOrder::test_stages_finalize_downstream_first\n========================= 4 failed, 8 passed in 0.08s ==========================\n"
+      }
+    },
+    {
+      "turn": 9,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 65,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 test_order4.py"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Immediately after break, order2: []\nAfter sleep(0), order2: []\nAfter sleep(0) x2, order2: []\nsource2 finally"
+        }
+      ]
+    },
+    {
+      "turn": 10,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 4029,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "write_file",
+          "args": {
+            "path": "test_order5.py",
+            "content": "import asyncio\n\nasync def main():\n    order = []\n    \n    async def source():\n        yield 1\n    \n    async def C(items):\n        try:\n            async for x in items:\n                yield x\n      "
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "write_file",
+          "result_preview": "OK: wrote 617 bytes to test_order5.py"
+        }
+      ],
+      "test_run": {
+        "passed": false,
+        "output_tail": "stages_finalize_downstream_first\n    ???\nE   AssertionError: Expected finalization order C→B→A (downstream first), got ['A', 'B', 'C']\nE   assert ['A', 'B', 'C'] == ['C', 'B', 'A']\nE     \nE     At index 0 diff: 'A' != 'C'\nE     Use -v to get more diff\n=========================== short test summary info ============================\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_finalizer_runs_when_stage_raises\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_upstream_finalizer_runs_on_downstream_exception\nFAILED tests/test_pipeline.py::TestFinalizerOnCancel::test_finalizers_run_on_early_break\nFAILED tests/test_pipeline.py::TestFinalizationOrder::test_stages_finalize_downstream_first\n========================= 4 failed, 8 passed in 0.08s ==========================\n"
+      }
+    },
+    {
+      "turn": 11,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 21,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 test_order5.py"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Order after async for: ['C']\nc is exhausted (StopAsyncIteration)"
+        }
+      ]
+    },
+    {
+      "turn": 12,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 117,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "write_file",
+          "args": {
+            "path": "test_order6.py",
+            "content": "import asyncio\n\nasync def main():\n    order = []\n    \n    async def source():\n        try:\n            yield 1\n        finally:\n            order.append(\"source\")\n    \n    async def C(items):\n        "
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "write_file",
+          "result_preview": "OK: wrote 454 bytes to test_order6.py"
+        }
+      ],
+      "test_run": {
+        "passed": false,
+        "output_tail": "stages_finalize_downstream_first\n    ???\nE   AssertionError: Expected finalization order C→B→A (downstream first), got ['A', 'B', 'C']\nE   assert ['A', 'B', 'C'] == ['C', 'B', 'A']\nE     \nE     At index 0 diff: 'A' != 'C'\nE     Use -v to get more diff\n=========================== short test summary info ============================\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_finalizer_runs_when_stage_raises\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_upstream_finalizer_runs_on_downstream_exception\nFAILED tests/test_pipeline.py::TestFinalizerOnCancel::test_finalizers_run_on_early_break\nFAILED tests/test_pipeline.py::TestFinalizationOrder::test_stages_finalize_downstream_first\n========================= 4 failed, 8 passed in 0.08s ==========================\n"
+      }
+    },
+    {
+      "turn": 13,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 48,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 test_order6.py"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Order after async for: ['source', 'C']"
+        }
+      ]
+    },
+    {
+      "turn": 14,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 8710,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "write_file",
+          "args": {
+            "path": "test_order7.py",
+            "content": "import asyncio\n\nasync def main():\n    order = []\n    \n    async def source():\n        try:\n            yield 1\n            yield 2\n        finally:\n            print(\"source finally\")\n    \n    async d"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "write_file",
+          "result_preview": "OK: wrote 928 bytes to test_order7.py"
+        }
+      ],
+      "test_run": {
+        "passed": false,
+        "output_tail": "stages_finalize_downstream_first\n    ???\nE   AssertionError: Expected finalization order C→B→A (downstream first), got ['A', 'B', 'C']\nE   assert ['A', 'B', 'C'] == ['C', 'B', 'A']\nE     \nE     At index 0 diff: 'A' != 'C'\nE     Use -v to get more diff\n=========================== short test summary info ============================\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_finalizer_runs_when_stage_raises\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_upstream_finalizer_runs_on_downstream_exception\nFAILED tests/test_pipeline.py::TestFinalizerOnCancel::test_finalizers_run_on_early_break\nFAILED tests/test_pipeline.py::TestFinalizationOrder::test_stages_finalize_downstream_first\n========================= 4 failed, 8 passed in 0.08s ==========================\n"
+      }
+    },
+    {
+      "turn": 15,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 88,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 test_order7.py"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Got item: 1\nAbout to aclose c...\nAfter aclose c, order: ['C']\nsource finally"
+        }
+      ]
+    },
+    {
+      "turn": 16,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 1007,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "write_file",
+          "args": {
+            "path": "test_order8.py",
+            "content": "import asyncio\n\nasync def main():\n    order = []\n    \n    async def source():\n        try:\n            yield 1\n            yield 2\n        finally:\n            print(\"source finally\")\n    \n    async d"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "write_file",
+          "result_preview": "OK: wrote 1129 bytes to test_order8.py"
+        }
+      ],
+      "test_run": {
+        "passed": false,
+        "output_tail": "stages_finalize_downstream_first\n    ???\nE   AssertionError: Expected finalization order C→B→A (downstream first), got ['A', 'B', 'C']\nE   assert ['A', 'B', 'C'] == ['C', 'B', 'A']\nE     \nE     At index 0 diff: 'A' != 'C'\nE     Use -v to get more diff\n=========================== short test summary info ============================\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_finalizer_runs_when_stage_raises\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_upstream_finalizer_runs_on_downstream_exception\nFAILED tests/test_pipeline.py::TestFinalizerOnCancel::test_finalizers_run_on_early_break\nFAILED tests/test_pipeline.py::TestFinalizationOrder::test_stages_finalize_downstream_first\n========================= 4 failed, 8 passed in 0.11s ==========================\n"
+      }
+    },
+    {
+      "turn": 17,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 67,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 test_order8.py"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "After break, order: []\nAfter explicit aclose all, order: ['C', 'B', 'A']\nAfter sleep, order: ['C', 'B', 'A']\nsource finally"
+        }
+      ]
+    },
+    {
+      "turn": 18,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 5509,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "write_file",
+          "args": {
+            "path": "test_order9.py",
+            "content": "import asyncio\n\nasync def main():\n    order = []\n    \n    async def source():\n        yield 1\n        # Don't return; wait forever\n        await asyncio.Event().wait()\n    \n    async def A(items):\n   "
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "write_file",
+          "result_preview": "OK: wrote 836 bytes to test_order9.py"
+        }
+      ],
+      "test_run": {
+        "passed": false,
+        "output_tail": "stages_finalize_downstream_first\n    ???\nE   AssertionError: Expected finalization order C→B→A (downstream first), got ['A', 'B', 'C']\nE   assert ['A', 'B', 'C'] == ['C', 'B', 'A']\nE     \nE     At index 0 diff: 'A' != 'C'\nE     Use -v to get more diff\n=========================== short test summary info ============================\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_finalizer_runs_when_stage_raises\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_upstream_finalizer_runs_on_downstream_exception\nFAILED tests/test_pipeline.py::TestFinalizerOnCancel::test_finalizers_run_on_early_break\nFAILED tests/test_pipeline.py::TestFinalizationOrder::test_stages_finalize_downstream_first\n========================= 4 failed, 8 passed in 0.08s ==========================\n"
+      }
+    },
+    {
+      "turn": 19,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 67,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "timeout 2 python3 test_order9.py || echo \"Timed out\""
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Timed out\n/bin/sh: timeout: command not found"
+        }
+      ]
+    },
+    {
+      "turn": 20,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 7005,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 --version"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Python 3.13.1"
+        }
+      ]
+    },
+    {
+      "turn": 21,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 2936,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "write_file",
+          "args": {
+            "path": "test_order10.py",
+            "content": "import asyncio\n\nasync def main():\n    order = []\n    \n    async def source():\n        try:\n            yield 1\n            yield 2\n        finally:\n            print(\"source finally\")\n    \n    async d"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "write_file",
+          "result_preview": "OK: wrote 990 bytes to test_order10.py"
+        }
+      ],
+      "test_run": {
+        "passed": false,
+        "output_tail": "stages_finalize_downstream_first\n    ???\nE   AssertionError: Expected finalization order C→B→A (downstream first), got ['A', 'B', 'C']\nE   assert ['A', 'B', 'C'] == ['C', 'B', 'A']\nE     \nE     At index 0 diff: 'A' != 'C'\nE     Use -v to get more diff\n=========================== short test summary info ============================\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_finalizer_runs_when_stage_raises\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_upstream_finalizer_runs_on_downstream_exception\nFAILED tests/test_pipeline.py::TestFinalizerOnCancel::test_finalizers_run_on_early_break\nFAILED tests/test_pipeline.py::TestFinalizationOrder::test_stages_finalize_downstream_first\n========================= 4 failed, 8 passed in 0.08s ==========================\n"
+      }
+    },
+    {
+      "turn": 22,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 83,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 test_order10.py"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Order: ['C', 'B', 'A']\nsource finally"
+        }
+      ]
+    },
+    {
+      "turn": 23,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 7032,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "write_file",
+          "args": {
+            "path": "test_aclose.py",
+            "content": "import asyncio\n\nasync def main():\n    order = []\n    \n    async def source():\n        yield 1\n    \n    async def A(items):\n        try:\n            async for x in items:\n                yield x\n      "
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "write_file",
+          "result_preview": "OK: wrote 592 bytes to test_aclose.py"
+        }
+      ],
+      "test_run": {
+        "passed": false,
+        "output_tail": "stages_finalize_downstream_first\n    ???\nE   AssertionError: Expected finalization order C→B→A (downstream first), got ['A', 'B', 'C']\nE   assert ['A', 'B', 'C'] == ['C', 'B', 'A']\nE     \nE     At index 0 diff: 'A' != 'C'\nE     Use -v to get more diff\n=========================== short test summary info ============================\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_finalizer_runs_when_stage_raises\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_upstream_finalizer_runs_on_downstream_exception\nFAILED tests/test_pipeline.py::TestFinalizerOnCancel::test_finalizers_run_on_early_break\nFAILED tests/test_pipeline.py::TestFinalizationOrder::test_stages_finalize_downstream_first\n========================= 4 failed, 8 passed in 0.08s ==========================\n"
+      }
+    },
+    {
+      "turn": 24,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 21,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 test_aclose.py"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Order after exhaustion: ['A']\naclose() succeeded\nOrder after aclose: ['A']"
+        }
+      ]
+    },
+    {
+      "turn": 25,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 7205,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "write_file",
+          "args": {
+            "path": "test_sentinel.py",
+            "content": "import asyncio\n\nclass SourceGen:\n    SENTINEL = object()\n    \n    def __init__(self, source):\n        self._source = list(source)\n        self._idx = 0\n    \n    def __aiter__(self):\n        return sel"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "write_file",
+          "result_preview": "OK: wrote 1264 bytes to test_sentinel.py"
+        }
+      ],
+      "test_run": {
+        "passed": false,
+        "output_tail": "stages_finalize_downstream_first\n    ???\nE   AssertionError: Expected finalization order C→B→A (downstream first), got ['A', 'B', 'C']\nE   assert ['A', 'B', 'C'] == ['C', 'B', 'A']\nE     \nE     At index 0 diff: 'A' != 'C'\nE     Use -v to get more diff\n=========================== short test summary info ============================\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_finalizer_runs_when_stage_raises\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_upstream_finalizer_runs_on_downstream_exception\nFAILED tests/test_pipeline.py::TestFinalizerOnCancel::test_finalizers_run_on_early_break\nFAILED tests/test_pipeline.py::TestFinalizationOrder::test_stages_finalize_downstream_first\n========================= 4 failed, 8 passed in 0.08s ==========================\n"
+      }
+    },
+    {
+      "turn": 26,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 30,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 test_sentinel.py"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Results: [1]\nOrder: ['C', 'B', 'A']"
+        }
+      ]
+    },
+    {
+      "turn": 27,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 8191,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "write_file",
+          "args": {
+            "path": "test_order11.py",
+            "content": "import asyncio\n\nasync def main():\n    order = []\n    \n    async def source():\n        try:\n            yield 1\n        finally:\n            order.append(\"source\")\n    \n    async def A(items):\n        "
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "write_file",
+          "result_preview": "OK: wrote 839 bytes to test_order11.py"
+        }
+      ],
+      "test_run": {
+        "passed": false,
+        "output_tail": "stages_finalize_downstream_first\n    ???\nE   AssertionError: Expected finalization order C→B→A (downstream first), got ['A', 'B', 'C']\nE   assert ['A', 'B', 'C'] == ['C', 'B', 'A']\nE     \nE     At index 0 diff: 'A' != 'C'\nE     Use -v to get more diff\n=========================== short test summary info ============================\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_finalizer_runs_when_stage_raises\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_upstream_finalizer_runs_on_downstream_exception\nFAILED tests/test_pipeline.py::TestFinalizerOnCancel::test_finalizers_run_on_early_break\nFAILED tests/test_pipeline.py::TestFinalizationOrder::test_stages_finalize_downstream_first\n========================= 4 failed, 8 passed in 0.08s ==========================\n"
+      }
+    },
+    {
+      "turn": 28,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 47,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 test_order11.py"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Order immediately: ['source', 'A', 'B', 'C']\nOrder after sleep(0): ['source', 'A', 'B', 'C']"
+        }
+      ]
+    },
+    {
+      "turn": 29,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 7143,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "write_file",
+          "args": {
+            "path": "test_cancel_multi.py",
+            "content": "import asyncio\n\nasync def main():\n    order = []\n    \n    async def source():\n        try:\n            yield 1\n            yield 2\n            yield 3\n        finally:\n            order.append(\"source"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "write_file",
+          "result_preview": "OK: wrote 1138 bytes to test_cancel_multi.py"
+        }
+      ],
+      "test_run": {
+        "passed": false,
+        "output_tail": "stages_finalize_downstream_first\n    ???\nE   AssertionError: Expected finalization order C→B→A (downstream first), got ['A', 'B', 'C']\nE   assert ['A', 'B', 'C'] == ['C', 'B', 'A']\nE     \nE     At index 0 diff: 'A' != 'C'\nE     Use -v to get more diff\n=========================== short test summary info ============================\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_finalizer_runs_when_stage_raises\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_upstream_finalizer_runs_on_downstream_exception\nFAILED tests/test_pipeline.py::TestFinalizerOnCancel::test_finalizers_run_on_early_break\nFAILED tests/test_pipeline.py::TestFinalizationOrder::test_stages_finalize_downstream_first\n========================= 4 failed, 8 passed in 0.08s ==========================\n"
+      }
+    },
+    {
+      "turn": 30,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 79,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 test_cancel_multi.py"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Order after cancel: ['source', 'A', 'B', 'C']\nOrder after sleep(0): ['source', 'A', 'B', 'C']"
+        }
+      ]
+    }
+  ],
+  "passed": false,
+  "pass_turn": null,
+  "total_turns": 30,
+  "total_api_calls": 30,
+  "end_time": "2026-05-06T12:12:51.384543",
+  "final_test_output": "stages_finalize_downstream_first\n    ???\nE   AssertionError: Expected finalization order C→B→A (downstream first), got ['A', 'B', 'C']\nE   assert ['A', 'B', 'C'] == ['C', 'B', 'A']\nE     \nE     At index 0 diff: 'A' != 'C'\nE     Use -v to get more diff\n=========================== short test summary info ============================\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_finalizer_runs_when_stage_raises\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_upstream_finalizer_runs_on_downstream_exception\nFAILED tests/test_pipeline.py::TestFinalizerOnCancel::test_finalizers_run_on_early_break\nFAILED tests/test_pipeline.py::TestFinalizationOrder::test_stages_finalize_downstream_first\n========================= 4 failed, 8 passed in 0.08s ==========================\n"
+}

@@ -1,0 +1,33 @@
+{
+  "task": "task_03_async_generator",
+  "start_time": "2026-05-06T10:35:30.709262",
+  "model": "kimi-for-coding",
+  "turns": [
+    {
+      "turn": 1,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 91,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -m pytest tests/ -v"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "t_pipeline.py::TestBasic::test_empty_source PASSED              [ 25%]\ntests/test_pipeline.py::TestBasic::test_no_stages PASSED                 [ 33%]\ntests/test_pipeline.py::TestFinalizerOnSuccess::test_single_stage_finalizer_runs PASSED [ 41%]\ntests/test_pipeline.py::TestFinalizerOnSuccess::test_all_stages_finalize_on_success PASSED [ 50%]\ntests/test_pipeline.py::TestFinalizerOnException::test_f"
+        }
+      ]
+    }
+  ],
+  "passed": false,
+  "pass_turn": null,
+  "total_turns": 1,
+  "total_api_calls": 1,
+  "end_time": "2026-05-06T10:40:38.071667",
+  "final_test_output": "stages_finalize_downstream_first\n    ???\nE   AssertionError: Expected finalization order C→B→A (downstream first), got ['A', 'B', 'C']\nE   assert ['A', 'B', 'C'] == ['C', 'B', 'A']\nE     \nE     At index 0 diff: 'A' != 'C'\nE     Use -v to get more diff\n=========================== short test summary info ============================\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_finalizer_runs_when_stage_raises\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_upstream_finalizer_runs_on_downstream_exception\nFAILED tests/test_pipeline.py::TestFinalizerOnCancel::test_finalizers_run_on_early_break\nFAILED tests/test_pipeline.py::TestFinalizationOrder::test_stages_finalize_downstream_first\n========================= 4 failed, 8 passed in 0.08s ==========================\n"
+}
