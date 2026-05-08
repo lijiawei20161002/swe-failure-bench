@@ -2,8 +2,6 @@
 
 A single-task benchmark targeting a confirmed capability gap in Kimi 2.6 (`kimi-for-coding`): the async generator finalization contract when using manual `__anext__()` iteration.
 
-Tasks were selected by empirical elimination across multiple eval runs (May 4–8, 2026). Everything Kimi solved reliably was removed. See `FINDINGS.md` for the full elimination history.
-
 ## Active Task
 
 | Seed | Core challenge | Pass rate (5 runs) |
@@ -50,24 +48,3 @@ cd seeds/retry_stream && python3 -m pytest tests/ -x -q 2>&1 | tail -5
 | Task | 5-run pass rate | Failure mode |
 |------|----------------|--------------|
 | retry_stream | 0/5 (0%) | Genuine gap — never recognises `__anext__()` loop needs explicit `aclose()` |
-
-### Retired tasks
-
-| Task | Reason retired |
-|------|---------------|
-| 02 tokenizer | API abort on every run — infrastructure failure, not capability |
-| 03 async_generator | Mode C failure: Kimi adds `aclose()` but iterates forward instead of `reversed()` — ordering trick, not genuine gap |
-| 04 concurrent_pipeline | Solved 1/1 — too easy |
-| 06 stream_multiplexer | Solved 1/1 — too easy |
-| 07 saga | Not yet tested |
-| 08 gc_cycles | API-unreliable; 2/5 when stable — not a clean 0% |
-| 09 query_plan | Not yet tested |
-| 10 pubsub | Not yet tested |
-| exc_info_leak | 5/5 — Kimi knows `sys.exc_info()` traceback retention |
-| frame_codec | 5/5 — Kimi spots byte-order mismatch |
-| generator_stop | 5/5 — Kimi knows PEP 479 |
-| weakref_callback | 5/5 — Kimi knows bound methods are ephemeral in WeakValueDictionary |
-| context_vars | 5/5 — Kimi knows `contextvars.Context()` isolation |
-| raft_log | 5/5 — Kimi knows Raft AppendEntries spec |
-| btree | 5/5 — Kimi knows CLRS B-tree split |
-| async_worker_pool | 4/5 — Kimi knows asyncio cancellation patterns |
