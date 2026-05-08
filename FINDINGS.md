@@ -186,12 +186,12 @@ All runs saved in `trajectories/`. Notable trajectories:
 
 | File | Content |
 |---|---|
-| `task_02_tokenizer_202605*.json` | Always 1–2 turns, API abort mid-response |
-| `task_03_async_generator_20260505_121334.json` | 30 turns, 82K reasoning chars, 0 writes — canonical exploration loop (old seed) |
-| `task_03_async_generator_20260505_131757.json` | 15 turns, PASSED — Kimi found `aclose()` via source reading (old seed) |
-| `task_03_async_generator_20260507_183650.json` | 30 turns, writes every other turn — Mode C: `aclose()` added but forward order, 4 tests always failing (new seed) |
-| `task_03_async_generator_20260507_192948.json` | 30 turns, write at turn 20 → 1 test still failing — closest new-seed attempt; `reversed()` still missing |
-| `task_08_gc_cycles_20260505_125053.json` | 5 turns, PASSED — found inverted subtraction via code reading |
-| `task_08_gc_cycles_20260505_133723.json` | 1 turn, API abort |
-| `task_05_retry_stream_20260507_191111.json` | 30 turns, 0 writes — cancellation test fails; pure exploration loop (run 1 of 5) |
-| `task_05_retry_stream_20260507_152209.json` | 30 turns, 0 writes — StopIteration propagation test fails first (alternate failure mode) |
+| `tokenizer_202605*.json` | Always 1–2 turns, API abort mid-response |
+| `async_generator_20260505_121334.json` | 30 turns, 82K reasoning chars, 0 writes — canonical exploration loop (old seed) |
+| `async_generator_20260505_131757.json` | 15 turns, PASSED — Kimi found `aclose()` via source reading (old seed) |
+| `async_generator_20260507_183650.json` | 30 turns, writes every other turn — Mode C: `aclose()` added but forward order, 4 tests always failing (new seed) |
+| `async_generator_20260507_192948.json` | 30 turns, write at turn 20 → 1 test still failing — closest new-seed attempt; `reversed()` still missing |
+| `gc_cycles_20260505_125053.json` | 5 turns, PASSED — found inverted subtraction via code reading |
+| `gc_cycles_20260505_133723.json` | 1 turn, API abort |
+| `retry_stream_20260507_191111.json` | 30 turns, 0 writes — cancellation test fails; pure exploration loop (run 1 of 5) |
+| `retry_stream_20260507_152209.json` | 30 turns, 0 writes — StopIteration propagation test fails first (alternate failure mode) |

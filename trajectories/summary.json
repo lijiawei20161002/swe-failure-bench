@@ -4,18 +4,13 @@
   "max_turns": 30,
   "runs_per_task": 5,
   "per_task": {
-    "task_03_async_generator": {
-      "passes": 0,
-      "runs": 5,
-      "pass_rate": 0.0
-    },
-    "task_05_retry_stream": {
+    "retry_stream": {
       "passes": 0,
       "runs": 5,
       "pass_rate": 0.0
     }
   },
   "total_passed": 0,
-  "total_attempts": 10,
+  "total_attempts": 5,
   "pass_rate": 0.0
 }
