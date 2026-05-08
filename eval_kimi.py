@@ -194,7 +194,7 @@ def list_workspace_files(workspace: Path) -> list[str]:
 
 def run_tests(workspace: Path, task_name: str) -> tuple[bool, str]:
     """Return (passed, output)."""
-    extra_install = "pytest pytest-asyncio" if "async" in task_name else "pytest"
+    extra_install = "pytest pytest-asyncio"   # all tasks use asyncio
     install_cmd = f"pip install {extra_install} --quiet 2>/dev/null"
     subprocess.run(install_cmd, shell=True, cwd=workspace, capture_output=True)
 
@@ -494,18 +494,6 @@ def main():
         "total_passed":   total_passed,
         "total_attempts": total_attempts,
         "pass_rate":   total_passed / total_attempts if total_attempts else 0,
-    }
-    (TRAJ_DIR / "summary.json").write_text(json.dumps(summary, indent=2))
-    print(f"Summary saved to trajectories/summary.json")
-
-    summary = {
-        "timestamp":   datetime.now().isoformat(),
-        "model":       KIMI_MODEL,
-        "max_turns":   args.max_turns,
-        "results":     results,
-        "passed":      passed_count,
-        "total":       total,
-        "pass_rate":   passed_count / total if total else 0,
     }
     (TRAJ_DIR / "summary.json").write_text(json.dumps(summary, indent=2))
     print(f"Summary saved to trajectories/summary.json")

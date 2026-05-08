@@ -1,0 +1,613 @@
+{
+  "task": "task_05_retry_stream",
+  "start_time": "2026-05-07T14:52:15.408161",
+  "model": "kimi-for-coding",
+  "turns": [
+    {
+      "turn": 1,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 157,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -m pytest tests/ -v"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "ally block to guarantee synchronous cleanup.\nE       assert 'A' in []\n\n../../../seeds/task_05_retry_stream/tests/test_stream.py:107: AssertionError\n_ TestFinalizerOnException.test_source_finalizes_when_fn_raises_on_first_item __\n\nself = <task_05_retry_stream.tests.test_stream.TestFinalizerOnException object at 0x106419590>\n\n    @pytest.mark.asyncio\n    async def test_source_finalizes_when_fn_raise"
+        }
+      ]
+    },
+    {
+      "turn": 2,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 29250,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_stop.py << 'EOF'\nimport asyncio\n\nasync def main():\n    f = asyncio.Future()\n    f.set_exception(StopIteration(\"hello\"))\n    try:\n        await f\n    except StopIteration as e:\n        "
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Caught RuntimeError: StopIteration interacts badly with generators and cannot be raised into a Future"
+        }
+      ]
+    },
+    {
+      "turn": 3,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 490,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_stop2.py << 'EOF'\nimport asyncio\n\ndef bad():\n    raise StopIteration(\"hello\")\n\nasync def main():\n    loop = asyncio.get_running_loop()\n    try:\n        await loop.run_in_executor(None,"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Caught RuntimeError: StopIteration interacts badly with generators and cannot be raised into a Future"
+        }
+      ]
+    },
+    {
+      "turn": 4,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 1455,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_stop3.py << 'EOF'\nimport asyncio\n\ndef bad():\n    raise StopIteration(\"hello\")\n\nasync def coro():\n    try:\n        bad()\n    except StopIteration:\n        raise\n\nasync def main():\n    t"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Caught RuntimeError: coroutine raised StopIteration"
+        }
+      ]
+    },
+    {
+      "turn": 5,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 1115,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_stop4.py << 'EOF'\nimport asyncio\nimport types\n\ndef bad():\n    raise StopIteration(\"hello\")\n\n@types.coroutine\ndef gen():\n    bad()\n    yield  # never reached\n\nasync def main():\n    try:"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Caught RuntimeError: generator raised StopIteration"
+        }
+      ]
+    },
+    {
+      "turn": 6,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 3141,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 --version"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Python 3.13.1"
+        }
+      ]
+    },
+    {
+      "turn": 7,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 21828,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_stop5.py << 'EOF'\nimport asyncio\nfrom concurrent.futures import Future\n\ndef bad():\n    raise StopIteration(\"hello\")\n\nasync def main():\n    cf = Future()\n    try:\n        cf.set_excepti"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Caught RuntimeError: StopIteration interacts badly with generators and cannot be raised into a Future"
+        }
+      ]
+    },
+    {
+      "turn": 8,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 4669,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_yieldfrom.py << 'EOF'\nimport asyncio\n\nasync def coro():\n    return 42\n\ndef gen():\n    return (yield from coro())\n\nasync def main():\n    try:\n        x = await gen()\n        print(\"Resu"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Error: <class 'TypeError'> object generator can't be used in 'await' expression"
+        }
+      ]
+    },
+    {
+      "turn": 9,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 143,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_yieldfrom2.py << 'EOF'\nimport asyncio\n\nasync def coro():\n    return 42\n\n@asyncio.coroutine\ndef gen():\n    return (yield from coro().__await__())\n\nasync def main():\n    try:\n        x ="
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Traceback (most recent call last):\n  File \"/tmp/test_yieldfrom2.py\", line 6, in <module>\n    @asyncio.coroutine\n     ^^^^^^^^^^^^^^^^^\nAttributeError: module 'asyncio' has no attribute 'coroutine'. Did you mean: 'coroutines'?"
+        }
+      ]
+    },
+    {
+      "turn": 10,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 205,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_yieldfrom3.py << 'EOF'\nimport asyncio\nimport types\n\nasync def coro():\n    return 42\n\n@types.coroutine\ndef gen():\n    return (yield from coro().__await__())\n\nasync def main():\n    try:\n"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Result: 42"
+        }
+      ]
+    },
+    {
+      "turn": 11,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 291,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_yieldfrom4.py << 'EOF'\nimport asyncio\nimport types\n\ndef bad():\n    raise StopIteration(\"hello\")\n\n@types.coroutine\ndef gen():\n    bad()\n    yield  # never reached\n\nasync def main():\n   "
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Caught RuntimeError: generator raised StopIteration"
+        }
+      ]
+    },
+    {
+      "turn": 12,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 6153,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_awaitable.py << 'EOF'\nimport asyncio\n\nclass MyAwaitable:\n    def __init__(self, exc=None):\n        self.exc = exc\n\n    def __await__(self):\n        if self.exc:\n            raise self."
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Caught RuntimeError: generator raised StopIteration"
+        }
+      ]
+    },
+    {
+      "turn": 13,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 7603,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_subclass.py << 'EOF'\nimport asyncio\n\nclass MyStop(StopIteration):\n    pass\n\ndef bad():\n    raise MyStop(\"hello\")\n\nasync def coro():\n    bad()\n\nasync def main():\n    try:\n        await "
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Caught RuntimeError: coroutine raised StopIteration"
+        }
+      ]
+    },
+    {
+      "turn": 14,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 3160,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_regular.py << 'EOF'\nimport asyncio\nimport pytest\n\ndef bad():\n    raise StopIteration(\"hello\")\n\nasync def coro():\n    bad()\n\nasync def main():\n    try:\n        with pytest.raises(StopIt"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Other: <class 'RuntimeError'> coroutine raised StopIteration"
+        }
+      ]
+    },
+    {
+      "turn": 15,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 4612,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_pytest_stop.py << 'EOF'\nimport asyncio\nimport pytest\n\ndef bad():\n    raise StopIteration(\"hello\")\n\nasync def coro():\n    bad()\n\nclass TestStop:\n    @pytest.mark.asyncio\n    async def t"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "============================= test session starts ==============================\nplatform darwin -- Python 3.13.1, pytest-9.0.2, pluggy-1.6.0 -- /opt/homebrew/opt/python@3.13/bin/python3.13\ncachedir: .pytest_cache\nrootdir: /tmp\nplugins: anyio-4.12.1, asyncio-1.3.0\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\ncollecting .."
+        }
+      ]
+    },
+    {
+      "turn": 16,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 18522,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_thread.py << 'EOF'\nimport asyncio\nimport threading\nimport pytest\n\ndef abort_at_50(x):\n    if x == 50:\n        raise StopIteration(\"early abort\")\n    return x\n\nclass StreamProcessor:\n  "
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "============================= test session starts ==============================\nplatform darwin -- Python 3.13.1, pytest-9.0.2, pluggy-1.6.0 -- /opt/homebrew/opt/python@3.13/bin/python3.13\ncachedir: .pytest_cache\nrootdir: /tmp\nplugins: anyio-4.12.1, asyncio-1.3.0\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\ncollecting .."
+        }
+      ]
+    },
+    {
+      "turn": 17,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 11874,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_await_raise.py << 'EOF'\nimport asyncio\n\nclass BadAwaitable:\n    def __await__(self):\n        raise StopIteration(\"hello\")\n\nasync def main():\n    try:\n        await BadAwaitable()\n    e"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Caught StopIteration: hello"
+        }
+      ]
+    },
+    {
+      "turn": 18,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 2792,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_await_return.py << 'EOF'\nimport asyncio\nimport pytest\n\ndef abort_at_50(x):\n    if x == 50:\n        raise StopIteration(\"early abort\")\n    return x\n\nclass RaiseStop:\n    def __init__(se"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "============================= test session starts ==============================\nplatform darwin -- Python 3.13.1, pytest-9.0.2, pluggy-1.6.0 -- /opt/homebrew/opt/python@3.13/bin/python3.13\ncachedir: .pytest_cache\nrootdir: /tmp\nplugins: anyio-4.12.1, asyncio-1.3.0\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\ncollecting .."
+        }
+      ]
+    },
+    {
+      "turn": 19,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 16378,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_custom_iter.py << 'EOF'\nimport asyncio\n\nclass MyIter:\n    def __init__(self, exc=None):\n        self.exc = exc\n        self.step = 0\n\n    def __iter__(self):\n        return self\n\n    d"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Caught RuntimeError: Task got bad yield: <coroutine object sleep at 0x101a1e440>\n/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/events.py:89: RuntimeWarning: coroutine 'sleep' was never awaited\n  self._context.run(self._callback, *self._args)\nRuntimeWarning: Enable tracemalloc to get the object allocation traceback"
+        }
+      ]
+    },
+    {
+      "turn": 20,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 821,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_custom_iter2.py << 'EOF'\nimport asyncio\n\nclass MyIter:\n    def __init__(self, exc=None):\n        self.exc = exc\n        self.step = 0\n\n    def __iter__(self):\n        return self\n\n    "
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Caught RuntimeError for ValueError: yield was used instead of yield from in task <Task pending name='Task-1' coro=<main() running at /tmp/test_custom_iter2.py:32> cb=[_run_until_complete_cb() at /opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py:181]> with <Future finished result=None>\nCaught RuntimeError for StopIteration: yield"
+        }
+      ]
+    },
+    {
+      "turn": 21,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 1274,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_custom_iter3.py << 'EOF'\nimport asyncio\n\nclass MyIter:\n    def __init__(self, exc=None):\n        self.exc = exc\n        self.step = 0\n\n    def __iter__(self):\n        return self\n\n    "
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Caught RuntimeError for ValueError: yield was used instead of yield from in task <Task pending name='Task-1' coro=<main() running at /tmp/test_custom_iter3.py:30> cb=[_run_until_complete_cb() at /opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py:181]> with <Task pending name='Task-2' coro=<sleep() running at /opt/homebrew/Cellar/"
+        }
+      ]
+    },
+    {
+      "turn": 22,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 4211,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_custom_iter4.py << 'EOF'\nimport asyncio\n\nclass MyIter:\n    def __init__(self, exc=None):\n        self.exc = exc\n        self.step = 0\n        self.fut = asyncio.Future()\n\n    def __ite"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Caught RuntimeError for ValueError: yield was used instead of yield from in task <Task pending name='Task-1' coro=<main() running at /tmp/test_custom_iter4.py:32> cb=[_run_until_complete_cb() at /opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py:181]> with <Future pending>\nCaught RuntimeError for StopIteration: yield was used ins"
+        }
+      ]
+    },
+    {
+      "turn": 23,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 4187,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_custom_iter5.py << 'EOF'\nimport asyncio\n\nclass MyIter:\n    def __init__(self):\n        self.step = 0\n\n    def __iter__(self):\n        return self\n\n    def __next__(self):\n        self."
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Before await\nAfter await, result: done"
+        }
+      ]
+    },
+    {
+      "turn": 24,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 248,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_custom_iter6.py << 'EOF'\nimport asyncio\n\nclass MyIter:\n    def __init__(self):\n        self.step = 0\n        self.fut = asyncio.Future()\n        self.fut.set_result(None)\n\n    def __it"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Before await\nTraceback (most recent call last):\n  File \"/tmp/test_custom_iter6.py\", line 27, in <module>\n    asyncio.run(main())\n    ~~~~~~~~~~~^^^^^^^^\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py\", line 194, in run\n    return runner.run(main)\n           ~~~~~~~~~~^^^^^^\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.1/"
+        }
+      ]
+    },
+    {
+      "turn": 25,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 3807,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_async_gen.py << 'EOF'\nimport asyncio\n\nasync def agen():\n    yield 1\n\nasync def main():\n    try:\n        await agen()\n    except TypeError as e:\n        print(\"TypeError:\", e)\n\nasyncio."
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "TypeError: object async_generator can't be used in 'await' expression"
+        }
+      ]
+    },
+    {
+      "turn": 26,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 14077,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_monkey.py << 'EOF'\nimport builtins\n\nclass MyStop(Exception):\n    pass\n\nbuiltins.StopIteration = MyStop\n\nimport pytest\n\nasync def coro():\n    raise MyStop(\"hello\")\n\n@pytest.mark.asyncio"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "  teardown.throw(exception)\nINTERNALERROR>     ~~~~~~~~~~~~~~^^^^^^^^^^^\nINTERNALERROR>   File \"/opt/homebrew/lib/python3.13/site-packages/_pytest/logging.py\", line 788, in pytest_collection\nINTERNALERROR>     return (yield)\nINTERNALERROR>             ^^^^^\nINTERNALERROR>   File \"/opt/homebrew/lib/python3.13/site-packages/pluggy/_callers.py\", line 139, in _multicall\nINTERNALERROR>     teardown.thr"
+        }
+      ]
+    },
+    {
+      "turn": 27,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 5649,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_result_awaitable.py << 'EOF'\nimport asyncio\nimport pytest\n\nclass ResultAwaitable:\n    def __init__(self, result):\n        self.result = result\n\n    def __await__(self):\n        if isin"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "============================= test session starts ==============================\nplatform darwin -- Python 3.13.1, pytest-9.0.2, pluggy-1.6.0 -- /opt/homebrew/opt/python@3.13/bin/python3.13\ncachedir: .pytest_cache\nrootdir: /tmp\nplugins: anyio-4.12.1, asyncio-1.3.0\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\ncollecting .."
+        }
+      ]
+    },
+    {
+      "turn": 28,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 4167,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_poll_iter.py << 'EOF'\nimport asyncio\n\nclass MyAwaitable:\n    def __init__(self, exc=None):\n        self.exc = exc\n        self._task = None\n        self._done = False\n        self._res"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Result: hello"
+        }
+      ]
+    },
+    {
+      "turn": 29,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 15135,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "cat > /tmp/test_task_subclass.py << 'EOF'\nimport asyncio\n\nclass StopFriendlyTask(asyncio.Task):\n    def _step(self, exc=None):\n        try:\n            if exc is None:\n                result = self._c"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Caught RuntimeError: coroutine raised StopIteration"
+        }
+      ]
+    },
+    {
+      "turn": 30,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 375,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"import asyncio; print(asyncio.Task.__module__)\""
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "_asyncio"
+        }
+      ]
+    }
+  ],
+  "passed": false,
+  "pass_turn": null,
+  "total_turns": 30,
+  "total_api_calls": 30,
+  "end_time": "2026-05-07T15:22:08.941812",
+  "final_test_output": "te\" in finalized, (\nE   AssertionError: Infinite source must finalize when the processing task is cancelled.\nE   assert 'infinite' in []\n=========================== short test summary info ============================\nFAILED tests/test_stream.py::TestFinalizerOnException::test_source_finalizes_when_fn_raises\nFAILED tests/test_stream.py::TestFinalizerOnException::test_source_finalizes_when_fn_raises_on_first_item\nFAILED tests/test_stream.py::TestFinalizerOnException::test_async_source_finalizes_when_async_fn_raises\nFAILED tests/test_stream.py::TestFinalizerOnException::test_large_source_finalizes_on_early_abort\nFAILED tests/test_stream.py::TestFinalizerOnCancellation::test_source_finalizes_on_task_cancellation\n========================= 5 failed, 8 passed in 0.09s ==========================\n"
+}

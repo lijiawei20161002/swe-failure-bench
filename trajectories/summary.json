@@ -1,41 +1,21 @@
 {
-  "timestamp": "2026-05-06T21:12:22.206960",
+  "timestamp": "2026-05-07T22:05:07.229154",
   "model": "kimi-for-coding",
   "max_turns": 30,
   "runs_per_task": 5,
   "per_task": {
-    "task_02_tokenizer": {
+    "task_03_async_generator": {
       "passes": 0,
       "runs": 5,
       "pass_rate": 0.0
     },
-    "task_03_async_generator": {
-      "passes": 3,
+    "task_05_retry_stream": {
+      "passes": 0,
       "runs": 5,
-      "pass_rate": 0.6
-    },
-    "task_07_saga": {
-      "passes": 5,
-      "runs": 5,
-      "pass_rate": 1.0
-    },
-    "task_08_gc_cycles": {
-      "passes": 2,
-      "runs": 5,
-      "pass_rate": 0.4
-    },
-    "task_09_query_plan": {
-      "passes": 5,
-      "runs": 5,
-      "pass_rate": 1.0
-    },
-    "task_10_pubsub": {
-      "passes": 3,
-      "runs": 5,
-      "pass_rate": 0.6
+      "pass_rate": 0.0
     }
   },
-  "total_passed": 18,
-  "total_attempts": 30,
-  "pass_rate": 0.6
+  "total_passed": 0,
+  "total_attempts": 10,
+  "pass_rate": 0.0
 }

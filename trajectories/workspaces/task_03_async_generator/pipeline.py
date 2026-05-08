@@ -57,7 +57,7 @@ class Pipeline:
                 yield item
 
         current: AsyncIterable = _source_gen()
-        generators = [current]
+        generators = []
 
         for stage_fn in self._stages:
             gen = stage_fn(current)
@@ -68,14 +68,9 @@ class Pipeline:
         try:
             async for item in current:
                 results.append(item)
-                if len(results) >= len(source):
-                    break
         finally:
             for gen in reversed(generators):
-                try:
-                    await gen.aclose()
-                except Exception:
-                    pass
+                await gen.aclose()
 
         return results
 
@@ -89,7 +84,7 @@ class Pipeline:
                 yield item
 
         current: AsyncIterable = _source_gen()
-        generators = [current]
+        generators = []
 
         for stage_fn in self._stages:
             gen = stage_fn(current)
@@ -104,10 +99,7 @@ class Pipeline:
                     break
         finally:
             for gen in reversed(generators):
-                try:
-                    await gen.aclose()
-                except Exception:
-                    pass
+                await gen.aclose()
 
         return results
 

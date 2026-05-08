@@ -1,32 +1,28 @@
 # SWE Failure Bench
 
-Six Python bug-fixing tasks targeting the failure modes of Kimi 2.6 (kimi-for-coding).
+A single-task benchmark targeting a confirmed capability gap in Kimi 2.6 (`kimi-for-coding`): the async generator finalization contract when using manual `__anext__()` iteration.
 
-Tasks were selected/designed by empirical elimination across multiple eval runs. Everything Kimi solved reliably was removed. The remaining tasks combine confirmed failures (02, 03, 08) with new multi-file engineering bugs (07, 09, 10) that require tracing through 3–4 files to understand.
+Tasks were selected by empirical elimination across multiple eval runs (May 4–8, 2026). Everything Kimi solved reliably was removed. See `FINDINGS.md` for the full elimination history.
 
-## Benchmark Goal
+## Active Task
 
-**Target pass rate: < 20%** on `kimi-for-coding` (or similar frontier coding models).
+| Seed | Core challenge | Pass rate (5 runs) |
+|------|---------------|-------------------|
+| `seeds/retry_stream/stream.py` | `StreamProcessor` uses manual `__anext__()` instead of `async for` — source generator is never `aclose()`'d on exception or cancellation | 0/5 (0%) |
 
-## Task Overview
+**Why this task:** Kimi knows that `async for` triggers cleanup but does not recognise the manual `__anext__()` pattern as requiring explicit `await source.aclose()` in a `finally` block. This is a genuine capability gap, not a trick — the fix is straightforward once you know it, but Kimi never writes it. 0 writes across all 7 observed failure runs.
 
-| # | Seed file(s) | Core challenge | Design intent |
-|---|-------------|---------------|---------------|
-| 02 | `task_02_tokenizer/tokenizer.py` | Regex state machine: raw strings, triple-quoted strings, escape sequences | Reasoning chain too long → API abort |
-| 03 | `task_03_async_generator/pipeline.py` | Async generator `aclose()` protocol — upstream stages never finalized | Test shows "finalizers not running"; `aclose()` is not deducible from the code |
-| 07 | `task_07_saga/orchestrator.py` + `booking.py` + `saga.py` | Saga compensations run in forward order instead of reverse — breaks dependent rollback | 3-file system; `booking.py` documents the dependency but you must read all 3 files to connect the dots |
-| 08 | `task_08_gc_cycles/ref_graph.py` | CPython GC tricolor: inverted `gc_refs` subtraction + finalizer leak | Test shows objects not collected; inverted direction looks plausible in both directions |
-| 09 | `task_09_query_plan/schema.py` + `planner.py` + `executor.py` + `database.py` | `schema._column_cache` not invalidated after `alter_table()` — planner's cache is correct; bug is in schema | 4-file system; `planner.py` correctly keys on schema version, `schema.py` silently returns stale column list |
-| 10 | `task_10_pubsub/broker.py` + `state.py` + `replica.py` | `subscribe_from_snapshot()` is not atomic — events between snapshot and offset capture are silently missed | Classic distributed systems race; invisible without understanding the snapshot/subscribe protocol |
+The two distinct failing tests (vary by run):
+- `test_source_finalizes_on_task_cancellation` — source not finalized when `asyncio.CancelledError` propagates through the manual loop
+- `test_large_source_finalizes_on_early_abort` — source not finalized when the transform raises `StopIteration`
 
 ## Running the Eval
 
 ```bash
 export KIMI_API_KEY=sk-...
-python3 eval_kimi.py                      # all 6 tasks
-python3 eval_kimi.py --task task_07_saga
-python3 eval_kimi.py --max-turns 30
-python3 eval_kimi.py --runs 5
+python3 eval_kimi.py                # retry_stream, 1 run
+python3 eval_kimi.py --runs 5       # 5 runs
+python3 eval_kimi.py --max-turns 40 # more turns (default 30)
 ```
 
 ## Directory Layout
@@ -34,51 +30,44 @@ python3 eval_kimi.py --runs 5
 ```
 swe-failure-bench/
   seeds/
-    task_02_tokenizer/
-    task_03_async_generator/
-    task_07_saga/
-    task_08_gc_cycles/
-    task_09_query_plan/
-    task_10_pubsub/
-  tasks/                    ← task descriptions
-  trajectories/             ← JSON trajectory files
+    retry_stream/           ← active seed (stream.py + tests/)
+  tasks/                    ← task descriptions (tokenizer, gc_cycles kept as archive)
+  trajectories/             ← JSON trajectory files from all eval runs
   eval_kimi.py              ← eval harness
-  FINDINGS.md               ← full analysis
+  FINDINGS.md               ← full elimination history and failure analysis
 ```
 
-## Verifying Seeds Fail
+## Verifying the Seed Fails
 
 ```bash
-for d in seeds/task_*/; do
-  echo -n "$d: "
-  (cd $d && python3 -m pytest tests/ -q 2>&1 | tail -1)
-done
+cd seeds/retry_stream && python3 -m pytest tests/ -x -q 2>&1 | tail -5
 ```
 
-## Empirical Results So Far
+## Results Summary
 
-### Confirmed failures (previously tested)
+### Active task
 
 | Task | 5-run pass rate | Failure mode |
 |------|----------------|--------------|
-| 02 tokenizer | 0/5 (0%) | Always API abort — reasoning chain too long |
-| 03 async_generator | 0/5 (0%) this run; 2/5 (40%) earlier | Exploration loop / failed writes; never discovers `aclose()` |
-| 08 gc_cycles | 2/5 (40%) | Solves when API stable; aborts otherwise |
+| retry_stream | 0/5 (0%) | Genuine gap — never recognises `__anext__()` loop needs explicit `aclose()` |
 
-### Trivially solved — removed
+### Retired tasks
 
-| Task | Pass rate | Why removed |
-|------|-----------|-------------|
-| lsm_store | 5/5 (100%) | Kimi reads file, spots cache not invalidated, fixes in 2–3 turns |
-| wal_recovery | 5/5 (100%) | Kimi spots `>=` vs `>` off-by-one immediately |
-| connpool | 5/5 (100%) | Kimi spots missing `rollback()` in checkin path immediately |
-| exc_info_leak | 5/5 (100%) | Kimi knows `sys.exc_info()[2]` traceback retention |
-| frame_codec | 5/5 (100%) | Kimi spots byte-order mismatch across 2 files |
-| generator_stop | 5/5 (100%) | Kimi knows PEP 479 StopIteration behavior |
-| weakref_callback | 5/5 (100%) | Kimi knows bound methods are ephemeral in WeakValueDictionary |
-| context_vars | 5/5 (100%) | Kimi knows `contextvars.Context()` isolation pattern |
-| raft_log | 5/5 (100%) | Kimi knows Raft AppendEntries spec |
-| btree | 5/5 (100%) | Kimi knows CLRS B-tree split algorithm |
-| async_worker_pool | 4/5 (80%) | Kimi knows asyncio cancellation patterns |
-
-### New tasks (07, 09, 10) — not yet tested
+| Task | Reason retired |
+|------|---------------|
+| 02 tokenizer | API abort on every run — infrastructure failure, not capability |
+| 03 async_generator | Mode C failure: Kimi adds `aclose()` but iterates forward instead of `reversed()` — ordering trick, not genuine gap |
+| 04 concurrent_pipeline | Solved 1/1 — too easy |
+| 06 stream_multiplexer | Solved 1/1 — too easy |
+| 07 saga | Not yet tested |
+| 08 gc_cycles | API-unreliable; 2/5 when stable — not a clean 0% |
+| 09 query_plan | Not yet tested |
+| 10 pubsub | Not yet tested |
+| exc_info_leak | 5/5 — Kimi knows `sys.exc_info()` traceback retention |
+| frame_codec | 5/5 — Kimi spots byte-order mismatch |
+| generator_stop | 5/5 — Kimi knows PEP 479 |
+| weakref_callback | 5/5 — Kimi knows bound methods are ephemeral in WeakValueDictionary |
+| context_vars | 5/5 — Kimi knows `contextvars.Context()` isolation |
+| raft_log | 5/5 — Kimi knows Raft AppendEntries spec |
+| btree | 5/5 — Kimi knows CLRS B-tree split |
+| async_worker_pool | 4/5 — Kimi knows asyncio cancellation patterns |

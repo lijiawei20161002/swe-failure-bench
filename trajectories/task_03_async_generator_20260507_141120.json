@@ -1,0 +1,433 @@
+{
+  "task": "task_03_async_generator",
+  "start_time": "2026-05-07T13:50:02.208266",
+  "model": "kimi-for-coding",
+  "turns": [
+    {
+      "turn": 1,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 12807,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\nimport asyncio\n\nasync def gen():\n    try:\n        await asyncio.sleep(10)\n        yield 1\n    finally:\n        print('finally')\n\nasync def main():\n    g = gen()\n    try:\n        await g.a"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "finally\ncancelled\ndone\n<string>:20: DeprecationWarning: There is no current event loop\n  task = asyncio.get_event_loop().create_task(main())"
+        }
+      ]
+    },
+    {
+      "turn": 2,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 435,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\nimport asyncio\n\nasync def upstream():\n    try:\n        for i in range(3):\n            print(f'upstream yield {i}')\n            yield i\n    finally:\n        print('upstream finally')\n\nasyn"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "upstream yield 0\ndownstream got 0\nconsumer got 0\nupstream yield 1\ndownstream got 1\ndownstream finally\ncaught boom\ndone\nupstream finally"
+        }
+      ]
+    },
+    {
+      "turn": 3,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 1706,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\nimport asyncio\n\nclass It:\n    def __init__(self):\n        self.i = 0\n    def __aiter__(self):\n        return self\n    async def __anext__(self):\n        if self.i >= 3:\n            raise "
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "1\ncaught\ndone"
+        }
+      ]
+    },
+    {
+      "turn": 4,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 2925,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\ndef gen():\n    try:\n        for i in range(3):\n            print(f'gen yield {i}')\n            yield i\n    finally:\n        print('gen finally')\n\ndef inner(items):\n    try:\n        for it"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "gen yield 0\ninner got 0\nconsumer got 0\ngen yield 1\ninner got 1\ninner finally\ncaught\ngen finally"
+        }
+      ]
+    },
+    {
+      "turn": 5,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 8307,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\nimport asyncio\n\nasync def gen():\n    try:\n        yield 1\n        yield 2\n    finally:\n        print('finally')\n\nasync def main():\n    async for item in gen():\n        print(item)\n       "
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "1\nafter loop\nfinally"
+        }
+      ]
+    },
+    {
+      "turn": 6,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 345,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\nimport asyncio\n\nclass It:\n    def __init__(self):\n        self.i = 0\n    def __aiter__(self):\n        return self\n    async def __anext__(self):\n        self.i += 1\n        if self.i > 3:"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "1\nafter"
+        }
+      ]
+    },
+    {
+      "turn": 7,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 4135,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 --version"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "Python 3.13.1"
+        }
+      ]
+    },
+    {
+      "turn": 8,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 8402,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\nimport asyncio\n\nasync def gen():\n    try:\n        await asyncio.sleep(10)\n        yield 1\n    finally:\n        print('gen finally')\n\nasync def run():\n    g = gen()\n    try:\n        await "
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "gen finally\ncancelled in run\nrun finally\naclose ok\nmain caught"
+        }
+      ]
+    },
+    {
+      "turn": 9,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 471,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\nimport asyncio\n\nasync def gen():\n    try:\n        yield 1\n        yield 2\n    finally:\n        print('gen finally')\n\nasync def run():\n    g = gen()\n    try:\n        # get first item\n     "
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "got 1\nrun finally\ngen finally\naclose ok"
+        }
+      ]
+    },
+    {
+      "turn": 10,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 1425,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\nimport asyncio\n\nasync def source():\n    try:\n        for i in [1,2,3]:\n            print(f'source yield {i}')\n            yield i\n    finally:\n        print('source finally')\n\nasync def s"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "source yield 1\nsage got 1\nconsumer got 1\ncancelled\nrun finally\nstage finally\naclose ok\nsource finally\naclose ok\nmain caught"
+        }
+      ]
+    },
+    {
+      "turn": 11,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 1162,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\nimport asyncio\n\nasync def source():\n    try:\n        for i in [1]:\n            yield i\n    finally:\n        print('source finally')\n\nasync def A(items):\n    try:\n        async for x in it"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "1\nsource finally\nA finally\nB finally\nC finally"
+        }
+      ]
+    },
+    {
+      "turn": 12,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 2258,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\nimport asyncio\n\nclass It:\n    def __init__(self):\n        self.i = 0\n    def __aiter__(self):\n        return self\n    async def __anext__(self):\n        self.i += 1\n        if self.i > 2:"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "1\n2\ndone"
+        }
+      ]
+    },
+    {
+      "turn": 13,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 168,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\nimport asyncio\n\nasync def gen():\n    try:\n        yield 1\n        yield 2\n    finally:\n        print('finally')\n\nasync def main():\n    async for item in gen():\n        print(item)\n    pri"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "1\n2\nfinally\ndone"
+        }
+      ]
+    },
+    {
+      "turn": 14,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 926,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\nimport dis\n\ndef f():\n    async def g():\n        pass\n    async def main():\n        async for item in g():\n            pass\n    dis.dis(main)\n\"\n"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": ""
+        }
+      ]
+    },
+    {
+      "turn": 15,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 101,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\nimport dis\n\ndef f():\n    async def g():\n        pass\n    async def main():\n        async for item in g():\n            pass\n    dis.dis(main.__code__)\n\"\n"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": ""
+        }
+      ]
+    },
+    {
+      "turn": 16,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 113,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\nimport dis\n\nasync def g():\n    pass\nasync def main():\n    async for item in g():\n        pass\ndis.dis(main.__code__)\n\"\n"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "6            RETURN_GENERATOR\n                POP_TOP\n        L1:     RESUME                   0\n\n   7            LOAD_GLOBAL              1 (g + NULL)\n                CALL                     0\n                GET_AITER\n        L2:     GET_ANEXT\n                LOAD_CONST               0 (None)\n        L3:     SEND                     3 (to L6)\n        L4:     YIELD_VALUE              1\n        L"
+        }
+      ]
+    },
+    {
+      "turn": 17,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 2236,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\nimport asyncio\n\nasync def source():\n    try:\n        for i in [1,2,3]:\n            yield i\n    finally:\n        print('source finally')\n\nasync def stage(items):\n    try:\n        async for"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "got 1\nstage finally\nafter aclose\nsource finally"
+        }
+      ]
+    },
+    {
+      "turn": 18,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 15325,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -m pytest tests/ -v"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "t_pipeline.py::TestBasic::test_empty_source PASSED              [ 25%]\ntests/test_pipeline.py::TestBasic::test_no_stages PASSED                 [ 33%]\ntests/test_pipeline.py::TestFinalizerOnSuccess::test_single_stage_finalizer_runs PASSED [ 41%]\ntests/test_pipeline.py::TestFinalizerOnSuccess::test_all_stages_finalize_on_success PASSED [ 50%]\ntests/test_pipeline.py::TestFinalizerOnException::test_f"
+        }
+      ]
+    },
+    {
+      "turn": 19,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 3076,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\nimport asyncio\n\nclass It:\n    def __init__(self):\n        self.i = 0\n    def __aiter__(self):\n        return self\n    async def __anext__(self):\n        self.i += 1\n        if self.i > 2:"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "1\n2\ndone"
+        }
+      ]
+    },
+    {
+      "turn": 20,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 8980,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\nimport asyncio\n\nclass Pipeline:\n    def __init__(self):\n        self._stages = []\n    def stage(self, fn):\n        self._stages.append(fn)\n        return fn\n    async def run(self, source"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "['A', 'B', 'C']"
+        }
+      ]
+    },
+    {
+      "turn": 21,
+      "finish_reason": "tool_calls",
+      "reasoning_length": 4950,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "run_bash",
+          "args": {
+            "command": "python3 -c \"\nimport asyncio\n\nasync def source():\n    try:\n        yield 1\n    finally:\n        print('source finally')\n\nasync def main():\n    async for item in source():\n        print(item)\n    print("
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "run_bash",
+          "result_preview": "1\nsource finally\ndone"
+        }
+      ]
+    }
+  ],
+  "passed": false,
+  "pass_turn": null,
+  "total_turns": 21,
+  "total_api_calls": 21,
+  "end_time": "2026-05-07T14:11:19.541788",
+  "final_test_output": "stages_finalize_downstream_first\n    ???\nE   AssertionError: Expected finalization order C→B→A (downstream first), got ['A', 'B', 'C']\nE   assert ['A', 'B', 'C'] == ['C', 'B', 'A']\nE     \nE     At index 0 diff: 'A' != 'C'\nE     Use -v to get more diff\n=========================== short test summary info ============================\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_finalizer_runs_when_stage_raises\nFAILED tests/test_pipeline.py::TestFinalizerOnException::test_upstream_finalizer_runs_on_downstream_exception\nFAILED tests/test_pipeline.py::TestFinalizerOnCancel::test_finalizers_run_on_early_break\nFAILED tests/test_pipeline.py::TestFinalizationOrder::test_stages_finalize_downstream_first\n========================= 4 failed, 8 passed in 0.08s ==========================\n"
+}
