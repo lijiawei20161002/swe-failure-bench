@@ -23,13 +23,23 @@ python3 eval_kimi.py --runs 5       # 5 runs
 python3 eval_kimi.py --max-turns 40 # more turns (default 30)
 ```
 
+## How the Eval Works
+
+`eval_kimi.py` discovers tasks by scanning `seeds/` for subdirectories that contain a `tests/` folder. For each task it:
+
+1. Reads the implementation file(s) and test file(s) from the seed directory
+2. Pastes them verbatim into the opening user message with a generic instruction: *"fix all bugs so `python3 -m pytest tests/ -v` exits with return code 0"*
+3. Runs Kimi in a tool-use loop (`read_file`, `write_file`, `run_bash`) for up to `--max-turns` turns
+4. After each `write_file` call, runs the test suite and records pass/fail
+
+No task description files are used — the prompt is built entirely from the seed source.
+
 ## Directory Layout
 
 ```
 swe-failure-bench/
   seeds/
     retry_stream/           ← active seed (stream.py + tests/)
-  tasks/                    ← task descriptions (tokenizer, gc_cycles kept as archive)
   trajectories/             ← JSON trajectory files from all eval runs
   eval_kimi.py              ← eval harness
 ```
