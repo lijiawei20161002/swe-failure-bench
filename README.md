@@ -32,7 +32,6 @@ swe-failure-bench/
   tasks/                    ← task descriptions (tokenizer, gc_cycles kept as archive)
   trajectories/             ← JSON trajectory files from all eval runs
   eval_kimi.py              ← eval harness
-  FINDINGS.md               ← full elimination history and failure analysis
 ```
 
 ## Verifying the Seed Fails
