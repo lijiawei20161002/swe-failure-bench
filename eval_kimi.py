@@ -41,9 +41,10 @@ KIMI_HEADERS = {
     "Content-Type": "application/json",
 }
 
-BENCH_DIR = Path(__file__).parent
-SEEDS_DIR = BENCH_DIR / "seeds"
-TRAJ_DIR  = BENCH_DIR / "trajectories"
+BENCH_DIR  = Path(__file__).parent
+SEEDS_DIR  = BENCH_DIR / "seeds"
+TRAJ_DIR   = BENCH_DIR / "trajectories"
+WORK_DIR   = BENCH_DIR / "workspaces"
 
 DEFAULT_MAX_TURNS = 30
 
@@ -194,7 +195,7 @@ def list_workspace_files(workspace: Path) -> list[str]:
 
 def run_tests(workspace: Path, task_name: str) -> tuple[bool, str]:
     """Return (passed, output)."""
-    extra_install = "pytest pytest-asyncio"   # all tasks use asyncio
+    extra_install = "pytest pytest-asyncio" if "stream" in task_name else "pytest"
     install_cmd = f"pip install {extra_install} --quiet 2>/dev/null"
     subprocess.run(install_cmd, shell=True, cwd=workspace, capture_output=True)
 
@@ -248,7 +249,7 @@ def eval_task(task_name: str, seed_dir: Path, max_turns: int) -> dict:
     print(f"{'='*62}")
 
     # Workspace
-    workspace = TRAJ_DIR / "workspaces" / task_name
+    workspace = WORK_DIR / task_name
     setup_workspace(seed_dir, workspace)
 
     system_prompt = (
@@ -302,6 +303,7 @@ def eval_task(task_name: str, seed_dir: Path, max_turns: int) -> dict:
             "turn": turn_idx + 1,
             "finish_reason": finish,
             "reasoning_length": len(reasoning),
+            "reasoning_content": reasoning,
             "content": content,
             "tool_calls": [],
             "tool_results": [],
@@ -336,11 +338,12 @@ def eval_task(task_name: str, seed_dir: Path, max_turns: int) -> dict:
 
                 turn_record["tool_calls"].append({
                     "name": fn_name,
-                    "args": {k: v[:200] if isinstance(v, str) else v for k, v in fn_args.items()},
+                    "args": fn_args,
                 })
                 turn_record["tool_results"].append({
                     "name": fn_name,
                     "result_preview": result[:400],
+                    "result_full": result,
                 })
 
                 tool_msgs.append({
@@ -405,11 +408,23 @@ def eval_task(task_name: str, seed_dir: Path, max_turns: int) -> dict:
     status = "✓ PASSED" if trajectory["passed"] else "✗ FAILED"
     print(f"  {status}  ({trajectory['total_turns']} turns, {total_api_calls} API calls)")
 
-    # Save trajectory
+    # Save full conversation log as the single trajectory file
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    traj_path = TRAJ_DIR / f"{task_name}_{ts}.json"
-    traj_path.write_text(json.dumps(trajectory, indent=2, ensure_ascii=False))
-    print(f"  → saved: {traj_path.name}")
+    conv_path = TRAJ_DIR / f"{task_name}_{ts}.json"
+    conv_log = {
+        "task":        task_name,
+        "timestamp":   ts,
+        "model":       KIMI_MODEL,
+        "passed":      trajectory["passed"],
+        "total_turns": trajectory["total_turns"],
+        "total_api_calls": total_api_calls,
+        "pass_turn":   trajectory["pass_turn"],
+        "final_test_output": trajectory.get("final_test_output", ""),
+        "turns":       trajectory["turns"],
+        "messages":    messages,
+    }
+    conv_path.write_text(json.dumps(conv_log, indent=2, ensure_ascii=False))
+    print(f"  → saved: {conv_path.name}")
 
     return trajectory
 
@@ -424,6 +439,7 @@ def main():
     args = parser.parse_args()
 
     TRAJ_DIR.mkdir(parents=True, exist_ok=True)
+    WORK_DIR.mkdir(parents=True, exist_ok=True)
 
     # Collect tasks
     if args.task:
