@@ -8,7 +8,7 @@ records full trajectories, and prints a pass/fail summary.
 Usage:
     export KIMI_API_KEY=sk-...
     python3 eval_kimi.py                      # all tasks
-    python3 eval_kimi.py --task task_02_connection_pool
+    python3 eval_kimi.py --task retry_stream
     python3 eval_kimi.py --max-turns 25
 """
 
